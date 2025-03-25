@@ -7,8 +7,9 @@ import java.util.List;
 
 /**
  * SecretRepository
+ *
  * @author Peter Rutschmann
  */
 public interface SecretRepository extends JpaRepository<Secret, Long> {
-   List<Secret> findByUserId(Long userId);
+    List<Secret> findByUserId(Long userId);
 }

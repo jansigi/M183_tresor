@@ -8,6 +8,7 @@ import lombok.Setter;
 
 /**
  * User
+ *
  * @author Peter Rutschmann
  */
 @Getter
@@ -17,19 +18,19 @@ import lombok.Setter;
 @Entity
 @Table(name = "user")
 public class User {
-   @Id
-   @GeneratedValue(strategy = GenerationType.IDENTITY)
-   private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-   @Column(nullable = false, name="first_name")
-   private String firstName;
+    @Column(nullable = false, name = "first_name")
+    private String firstName;
 
-   @Column(nullable = false, name="last_name")
-   private String lastName;
+    @Column(nullable = false, name = "last_name")
+    private String lastName;
 
-   @Column(nullable = false, unique = true)
-   private String email;
+    @Column(nullable = false, unique = true)
+    private String email;
 
-   @Column(nullable = false)
-   private String password;
+    @Column(nullable = false)
+    private String password;
 }

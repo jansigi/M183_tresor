@@ -1,22 +1,24 @@
 package ch.bbw.pr.tresorbackend.service;
 
 import ch.bbw.pr.tresorbackend.model.User;
+
 import java.util.List;
 
 /**
  * UserService
+ *
  * @author Peter Rutschmann
  */
 public interface UserService {
-   User createUser(User user);
+    User createUser(User user);
 
-   User getUserById(Long userId);
+    User getUserById(Long userId);
 
-   User findByEmail(String email);
+    User findByEmail(String email);
 
-   List<User> getAllUsers();
+    List<User> getAllUsers();
 
-   User updateUser(User user);
+    User updateUser(User user);
 
-   void deleteUser(Long userId);
+    void deleteUser(Long userId);
 }

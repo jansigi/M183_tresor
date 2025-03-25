@@ -10,6 +10,7 @@ import lombok.Setter;
 
 /**
  * NewSecret
+ *
  * @author Peter Rutschmann
  */
 @Getter
@@ -17,12 +18,12 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class NewSecret {
-   @NotEmpty (message="email is required.")
-   private String email;
+    @NotEmpty(message = "email is required.")
+    private String email;
 
-   @NotNull (message="secret is required.")
-   private JsonNode content;
+    @NotNull(message = "secret is required.")
+    private JsonNode content;
 
-   @NotEmpty (message="encryption password id is required.")
-   private String encryptPassword;
+    @NotEmpty(message = "encryption password id is required.")
+    private String encryptPassword;
 }

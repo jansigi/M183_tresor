@@ -1,11 +1,14 @@
 package ch.bbw.pr.tresorbackend.model;
 
 import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.Size;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 /**
  * EmailAdress
+ *
  * @author Peter Rutschmann
  */
 @Getter
@@ -13,6 +16,6 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class EmailAdress {
-   @NotEmpty (message="E-Mail is required.")
-   private String email;
+    @NotEmpty(message = "E-Mail is required.")
+    private String email;
 }
