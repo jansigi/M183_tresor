@@ -1,9 +1,6 @@
 package ch.bbw.pr.tresorbackend.controller;
 
-import ch.bbw.pr.tresorbackend.model.ConfigProperties;
-import ch.bbw.pr.tresorbackend.model.EmailAdress;
-import ch.bbw.pr.tresorbackend.model.RegisterUser;
-import ch.bbw.pr.tresorbackend.model.User;
+import ch.bbw.pr.tresorbackend.model.*;
 import ch.bbw.pr.tresorbackend.service.PasswordEncryptionService;
 import ch.bbw.pr.tresorbackend.service.UserService;
 import com.google.gson.Gson;
@@ -63,7 +60,7 @@ public class UserController {
         if (bindingResult.hasErrors()) {
             List<String> errors = bindingResult.getFieldErrors().stream()
                     .map(fieldError -> fieldError.getField() + ": " + fieldError.getDefaultMessage())
-                    .collect(Collectors.toList());
+                    .toList();
             System.out.println("UserController.createUser " + errors);
 
             JsonArray arr = new JsonArray();
@@ -76,10 +73,6 @@ public class UserController {
             return ResponseEntity.badRequest().body(json);
         }
         System.out.println("UserController.createUser: input validation passed");
-
-        //password validation
-        //todo ergänzen
-        System.out.println("UserController.createUser, password validation passed");
 
         //transform registerUser to user
         User user = new User(
@@ -97,6 +90,50 @@ public class UserController {
         String json = new Gson().toJson(obj);
         System.out.println("UserController.createUser " + json);
         return ResponseEntity.accepted().body(json);
+    }
+
+    // build login   User REST API
+    @CrossOrigin(origins = "${CROSS_ORIGIN}")
+    @PostMapping("/login")
+    public ResponseEntity<String> loginUser(@Valid @RequestBody LoginUser loginUser, BindingResult bindingResult) {
+        //captcha
+        //todo ergänzen
+
+        System.out.println("UserController.loginUser: captcha passed.");
+
+        //input validation
+        if (bindingResult.hasErrors()) {
+            List<String> errors = bindingResult.getFieldErrors().stream()
+                    .map(fieldError -> fieldError.getField() + ": " + fieldError.getDefaultMessage())
+                    .toList();
+            System.out.println("UserController.loginUser " + errors);
+
+            JsonArray arr = new JsonArray();
+            errors.forEach(arr::add);
+            JsonObject obj = new JsonObject();
+            obj.add("message", arr);
+            String json = new Gson().toJson(obj);
+
+            System.out.println("UserController.loginUser, validation fails: " + json);
+            return ResponseEntity.badRequest().body(json);
+        }
+        System.out.println("UserController.loginUser: input validation passed");
+
+        //password validation
+        User foundUser = userService.findByEmail(loginUser.getEmail());
+        if (foundUser != null && passwordService.matchPassword(loginUser.getPassword(), foundUser.getPassword())) {
+            System.out.println("UserController.loginUser, password validation passed");
+            JsonObject obj = new JsonObject();
+            obj.addProperty("userId", foundUser.getId());
+            String json = new Gson().toJson(obj);
+            return ResponseEntity.accepted().body(json);
+        } else {
+            System.out.println("UserController.loginUser, password validation failed");
+            JsonObject obj = new JsonObject();
+            obj.addProperty("message", "Invalid Login");
+            String json = new Gson().toJson(obj);
+            return ResponseEntity.status(401).body(json);
+        }
     }
 
     // build get user by id REST API

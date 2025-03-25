@@ -1,4 +1,6 @@
-import { useNavigate } from 'react-router-dom';
+import {useNavigate} from 'react-router-dom';
+import {loginUser} from "../../comunication/LoginUserCall";
+import React, {useState} from "react";
 
 /**
  * LoginUser
@@ -6,11 +8,18 @@ import { useNavigate } from 'react-router-dom';
  */
 function LoginUser({loginValues, setLoginValues}) {
     const navigate = useNavigate();
+    const [errorMessage, setErrorMessage] = useState('');
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log(loginValues);
-        navigate('/')
+        try {
+            const user = await loginUser(loginValues.email, loginValues.password);
+            console.log(user)
+            navigate('/');
+        } catch (error) {
+            console.error('Failed to fetch to server:', error.message);
+            setErrorMessage(error.message);
+        }
     };
 
     return (
@@ -44,6 +53,7 @@ function LoginUser({loginValues, setLoginValues}) {
                     </aside>
                 </section>
                 <button type="submit">Login</button>
+                {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
             </form>
         </div>
     );
