@@ -33,6 +33,7 @@ public class SecretController {
 
     private SecretService secretService;
     private UserService userService;
+    private EncryptUtil encryptUtil;
 
     // create secret REST API
     @CrossOrigin(origins = "${CROSS_ORIGIN}")
@@ -62,7 +63,7 @@ public class SecretController {
         Secret secret = new Secret(
                 null,
                 user.getId(),
-                new EncryptUtil(newSecret.getEncryptPassword()).encrypt(newSecret.getContent().toString())
+                encryptUtil.encrypt(newSecret.getContent().toString(), user.getSalt())
         );
         //save secret in db
         secretService.createSecret(secret);
@@ -88,7 +89,8 @@ public class SecretController {
         //Decrypt content
         for (Secret secret : secrets) {
             try {
-                secret.setContent(new EncryptUtil(credentials.getEncryptPassword()).decrypt(secret.getContent()));
+                User user = userService.getUserById(credentials.getUserId());
+                secret.setContent(encryptUtil.decrypt(secret.getContent(), user.getSalt()));
             } catch (EncryptionOperationNotPossibleException e) {
                 System.out.println("SecretController.getSecretsByUserId " + e + " " + secret);
                 secret.setContent("not encryptable. Wrong password?");
@@ -115,7 +117,7 @@ public class SecretController {
         //Decrypt content
         for (Secret secret : secrets) {
             try {
-                secret.setContent(new EncryptUtil(credentials.getEncryptPassword()).decrypt(secret.getContent()));
+                secret.setContent(encryptUtil.decrypt(secret.getContent(), user.getSalt()));
             } catch (EncryptionOperationNotPossibleException e) {
                 System.out.println("SecretController.getSecretsByEmail " + e + " " + secret);
                 secret.setContent("not encryptable. Wrong password?");
@@ -183,7 +185,8 @@ public class SecretController {
         }
         //check if Secret can be decrypted with password
         try {
-            new EncryptUtil(newSecret.getEncryptPassword()).decrypt(dbSecrete.getContent());
+            user = userService.getUserById(dbSecrete.getUserId());
+            encryptUtil.decrypt(dbSecrete.getContent(), user.getSalt());
         } catch (EncryptionOperationNotPossibleException e) {
             System.out.println("SecretController.updateSecret, invalid password");
             JsonObject obj = new JsonObject();
@@ -196,7 +199,7 @@ public class SecretController {
         Secret secret = new Secret(
                 secretId,
                 user.getId(),
-                new EncryptUtil(newSecret.getEncryptPassword()).encrypt(newSecret.getContent().toString())
+                encryptUtil.encrypt(newSecret.getContent().toString(), user.getSalt())
         );
         Secret updatedSecret = secretService.updateSecret(secret);
         //save secret in db

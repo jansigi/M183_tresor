@@ -1,6 +1,6 @@
 package ch.bbw.pr.tresorbackend.service;
 
-import org.springframework.beans.factory.annotation.Value;
+import ch.bbw.pr.tresorbackend.model.Config;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -11,14 +11,12 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class PasswordEncryptionService {
-
-    @Value("${security.pepper}")
-    private String pepper;
-
-    BCryptPasswordEncoder passwordEncoder;
+    private final BCryptPasswordEncoder passwordEncoder;
+    private final String pepper;
 
     public PasswordEncryptionService() {
         passwordEncoder = new BCryptPasswordEncoder();
+        pepper = Config.load().pepper();
     }
 
     public String hashPassword(String password) {

@@ -3,6 +3,7 @@ package ch.bbw.pr.tresorbackend.controller;
 import ch.bbw.pr.tresorbackend.model.*;
 import ch.bbw.pr.tresorbackend.service.PasswordEncryptionService;
 import ch.bbw.pr.tresorbackend.service.UserService;
+import ch.bbw.pr.tresorbackend.util.EncryptUtil;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -32,12 +33,14 @@ public class UserController {
     private UserService userService;
     private PasswordEncryptionService passwordService;
     private final ConfigProperties configProperties;
+    private EncryptUtil encryptUtil;
     private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
     @Autowired
     public UserController(ConfigProperties configProperties,
                           UserService userService,
-                          PasswordEncryptionService passwordService) {
+                          PasswordEncryptionService passwordService,
+                          EncryptUtil encryptUtil) {
         this.configProperties = configProperties;
         System.out.println("UserController.UserController: cross origin: " + configProperties.getOrigin());
         // Logging in the constructor
@@ -45,6 +48,7 @@ public class UserController {
         logger.debug("UserController.UserController: Cross Origin Config: {}", configProperties.getOrigin());
         this.userService = userService;
         this.passwordService = passwordService;
+        this.encryptUtil = encryptUtil;
     }
 
     // build create User REST API
@@ -80,7 +84,8 @@ public class UserController {
                 registerUser.getFirstName(),
                 registerUser.getLastName(),
                 registerUser.getEmail(),
-                passwordService.hashPassword(registerUser.getPassword())
+                passwordService.hashPassword(registerUser.getPassword()),
+                encryptUtil.generateSalt()
         );
 
         User savedUser = userService.createUser(user);
@@ -125,6 +130,7 @@ public class UserController {
             System.out.println("UserController.loginUser, password validation passed");
             JsonObject obj = new JsonObject();
             obj.addProperty("userId", foundUser.getId());
+            obj.addProperty("salt", foundUser.getSalt());
             String json = new Gson().toJson(obj);
             return ResponseEntity.accepted().body(json);
         } else {
