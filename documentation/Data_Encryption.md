@@ -1,0 +1,15 @@
+## Encryption Konzept
+
+![img.png](Konzept.png)
+
+
+## Passwort Hashing
+
+### Salt
+- Ein Salt ist eine zufällige Zeichenkette, die zu einem Passwort hinzugefügt wird, bevor es gehasht wird und ist pro Benutzer einzigartig.
+- Es wird verwendet, um sicherzustellen, dass identische Passwörter unterschiedliche Hashes erzeugen.
+
+### Pepper
+- Ein Pepper ist eine geheime Zeichenkette, die zu einem Passwort hinzugefügt wird, bevor es gehasht wird und ist für alle Benutzer gleich.
+- Das Pepper is in der Anwendung gespeichert und wird nicht in der Datenbank gespeichert.
+- Es wird verwendet, um sicherzustellen, dass selbst wenn ein Angreifer Zugriff auf die Datenbank hat, er die Passwörter nicht entschlüsseln kann, da er nicht über den Pepper verfügt.
