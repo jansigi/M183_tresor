@@ -19,12 +19,12 @@ public class PasswordEncryptionService {
         pepper = Config.load().pepper();
     }
 
-    public String hashPassword(String password) {
-        return passwordEncoder.encode(password + pepper);
+    public String hashPassword(String password, String salt) {
+        return passwordEncoder.encode(salt + password + pepper);
     }
 
-    public boolean matchPassword(String password, String hashedPassword) {
-        boolean isMatch = passwordEncoder.matches(password + pepper, hashedPassword);
+    public boolean matchPassword(String password, String hashedPassword, String salt) {
+        boolean isMatch = passwordEncoder.matches(salt + password + pepper, hashedPassword);
 
         if (isMatch) {
             System.out.println("Password matches!");

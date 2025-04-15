@@ -79,13 +79,14 @@ public class UserController {
         System.out.println("UserController.createUser: input validation passed");
 
         //transform registerUser to user
+        String newSalt = encryptUtil.generateSalt();
         User user = new User(
                 null,
                 registerUser.getFirstName(),
                 registerUser.getLastName(),
                 registerUser.getEmail(),
-                passwordService.hashPassword(registerUser.getPassword()),
-                encryptUtil.generateSalt()
+                passwordService.hashPassword(registerUser.getPassword(), newSalt),
+                newSalt
         );
 
         User savedUser = userService.createUser(user);
@@ -126,7 +127,7 @@ public class UserController {
 
         //password validation
         User foundUser = userService.findByEmail(loginUser.getEmail());
-        if (foundUser != null && passwordService.matchPassword(loginUser.getPassword(), foundUser.getPassword())) {
+        if (foundUser != null && passwordService.matchPassword(loginUser.getPassword(), foundUser.getPassword(), foundUser.getSalt())) {
             System.out.println("UserController.loginUser, password validation passed");
             JsonObject obj = new JsonObject();
             obj.addProperty("userId", foundUser.getId());

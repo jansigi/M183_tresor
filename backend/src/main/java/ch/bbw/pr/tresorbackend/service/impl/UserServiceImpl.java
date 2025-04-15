@@ -21,14 +21,9 @@ import java.util.Optional;
 public class UserServiceImpl implements UserService {
 
     private UserRepository userRepository;
-    private static final int SALT_LENGTH = 32;
 
     @Override
     public User createUser(User user) {
-        // Generate a unique salt for the user
-        byte[] salt = new byte[SALT_LENGTH];
-        new SecureRandom().nextBytes(salt);
-        user.setSalt(Base64.getEncoder().encodeToString(salt));
         return userRepository.save(user);
     }
 
