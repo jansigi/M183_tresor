@@ -43,7 +43,7 @@ public class SecretController {
         if (bindingResult.hasErrors()) {
             List<String> errors = bindingResult.getFieldErrors().stream()
                     .map(fieldError -> fieldError.getField() + ": " + fieldError.getDefaultMessage())
-                    .collect(Collectors.toList());
+                    .toList();
             System.out.println("SecretController.createSecret " + errors);
 
             JsonArray arr = new JsonArray();
@@ -92,7 +92,7 @@ public class SecretController {
                 User user = userService.getUserById(credentials.getUserId());
                 secret.setContent(encryptUtil.decrypt(secret.getContent(), user.getSalt()));
             } catch (EncryptionOperationNotPossibleException e) {
-                System.out.println("SecretController.getSecretsByUserId " + e + " " + secret);
+                System.out.println("SecretController.getSecretsByUserId " + e.getMessage() + " " + secret);
                 secret.setContent("not encryptable. Wrong password?");
             }
         }
