@@ -11,6 +11,14 @@ function LoginUser({loginValues, setLoginValues}) {
     const navigate = useNavigate();
     const [errorMessage, setErrorMessage] = useState('');
 
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setLoginValues(prev => ({
+            ...prev,
+            [name]: value
+        }));
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
@@ -31,10 +39,10 @@ function LoginUser({loginValues, setLoginValues}) {
                     <div className="form-group">
                         <label>Email</label>
                         <input
-                            type="email"
+                            type="text"
+                            name="email"
                             value={loginValues.email}
-                            onChange={(e) =>
-                                setLoginValues(prevValues => ({...prevValues, email: e.target.value}))}
+                            onChange={handleInputChange}
                             required
                             placeholder="Enter your email"
                         />
@@ -42,10 +50,10 @@ function LoginUser({loginValues, setLoginValues}) {
                     <div className="form-group">
                         <label>Password</label>
                         <input
-                            type="password"
+                            type="text"
+                            name="password"
                             value={loginValues.password}
-                            onChange={(e) =>
-                                setLoginValues(prevValues => ({...prevValues, password: e.target.value}))}
+                            onChange={handleInputChange}
                             required
                             placeholder="Enter your password"
                         />

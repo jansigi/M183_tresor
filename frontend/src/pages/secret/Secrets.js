@@ -1,5 +1,5 @@
 import '../../App.css';
-import './Secrets.css';
+import '../../css/Secrets.css';
 import React, {useEffect, useState} from 'react';
 import {getSecretsforUser} from "../../comunication/FetchSecrets";
 

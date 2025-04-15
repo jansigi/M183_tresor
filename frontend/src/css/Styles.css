@@ -208,8 +208,116 @@ button:hover {
   padding-top: 5rem;
 }
 
-/* Responsive Design */
+/* Secret Form Styles */
+.secret-form-container {
+  max-width: 800px;
+  margin: 6rem auto 2rem;
+  padding: 2.5rem;
+  background-color: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.secret-form-container h2 {
+  color: var(--primary-color);
+  margin-bottom: 2rem;
+  text-align: center;
+  font-size: 1.75rem;
+}
+
+.secret-form-section {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.secret-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.secret-form-group label {
+  font-weight: 500;
+  color: var(--text-color);
+  font-size: 0.9375rem;
+  text-transform: capitalize;
+}
+
+.secret-form-group input,
+.secret-form-group select,
+.secret-form-group textarea {
+  padding: 0.75rem;
+  border: 1px solid var(--border-color);
+  border-radius: 0.375rem;
+  font-size: 1rem;
+  transition: all 0.2s;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.secret-form-group select {
+  background-color: white;
+  cursor: pointer;
+}
+
+.secret-form-group textarea {
+  resize: vertical;
+  min-height: 120px;
+  font-family: inherit;
+}
+
+.secret-form-group input:focus,
+.secret-form-group select:focus,
+.secret-form-group textarea:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.secret-form-actions {
+  display: flex;
+  justify-content: center;
+  margin-top: 2rem;
+}
+
+.secret-form-actions button {
+  min-width: 120px;
+}
+
+/* Credit Card specific styles */
+.credit-card-form .secret-form-group input[name="cardnumber"] {
+  letter-spacing: 0.1em;
+  font-family: monospace;
+  font-size: 1.1rem;
+}
+
+.credit-card-form .secret-form-group input[name="cvv"] {
+  max-width: 100px;
+}
+
+.credit-card-form .secret-form-group input[name="expiration"] {
+  max-width: 120px;
+}
+
+/* Note specific styles */
+.note-form .secret-form-group textarea {
+  min-height: 200px;
+}
+
+/* Responsive adjustments */
 @media (max-width: 768px) {
+  .secret-form-container {
+    margin: 5rem 1rem 2rem;
+    padding: 1.5rem;
+  }
+  
+  .secret-form-section {
+    gap: 1rem;
+  }
+  
   .form-section {
     grid-template-columns: 1fr;
   }

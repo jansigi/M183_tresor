@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {postSecret} from "../../comunication/FetchSecrets";
+import "../../css/Styles.css";
 
 /**
  * NewCreditCard
@@ -35,66 +36,75 @@ function NewCreditCard({loginValues}) {
     };
 
     return (
-        <div>
-            <h2>Add new credit-card secret</h2>
-            <form onSubmit={handleSubmit}>
-                <section>
-                    <aside>
-                        <div>
-                            <label>card type:</label>
-                            <select
-                                value={creditCardValues.cardtype}
-                                onChange={(e) =>
-                                    setCreditCardValues((prevValues) => ({
-                                        ...prevValues,
-                                        cardtype: e.target.value,
-                                    }))}
-                                required
-                            >
-                                <option value="" disabled>
-                                    Please select card type
-                                </option>
-                                <option value="Visa">Visa</option>
-                                <option value="Mastercard">Mastercard</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label>cardnumber:</label>
-                            <input
-                                type="text"
-                                value={creditCardValues.cardnumber}
-                                onChange={(e) =>
-                                    setCreditCardValues(prevValues => ({...prevValues, cardnumber: e.target.value}))}
-                                required
-                                placeholder="Please enter cardnumber"
-                            />
-                        </div>
-                        <div>
-                            <label>expiration (mm/yy):</label>
-                            <input
-                                type="text"
-                                value={creditCardValues.expiration}
-                                onChange={(e) =>
-                                    setCreditCardValues(prevValues => ({...prevValues, expiration: e.target.value}))}
-                                required
-                                placeholder="Please enter expiration"
-                            />
-                        </div>
-                        <div>
-                            <label>cvv:</label>
-                            <input
-                                type="text"
-                                value={creditCardValues.cvv}
-                                onChange={(e) =>
-                                    setCreditCardValues(prevValues => ({...prevValues, cvv: e.target.value}))}
-                                required
-                                placeholder="Please enter cvv"
-                            />
-                        </div>
-                        <button type="submit">Save secret</button>
-                        {errorMessage && <p style={{color: 'red'}}>{errorMessage}</p>}
-                    </aside>
-                </section>
+        <div className="secret-form-container">
+            <h2>New Credit Card</h2>
+            <form onSubmit={handleSubmit} className="credit-card-form">
+                <div className="secret-form-section">
+                    <div className="secret-form-group">
+                        <label>Card Type</label>
+                        <select
+                            value={creditCardValues.cardtype}
+                            onChange={(e) =>
+                                setCreditCardValues((prevValues) => ({
+                                    ...prevValues,
+                                    cardtype: e.target.value,
+                                }))}
+                            required
+                        >
+                            <option value="" disabled>
+                                Select card type
+                            </option>
+                            <option value="Visa">Visa</option>
+                            <option value="Mastercard">Mastercard</option>
+                        </select>
+                    </div>
+                    <div className="secret-form-group">
+                        <label>Card Number</label>
+                        <input
+                            type="text"
+                            name="cardnumber"
+                            value={creditCardValues.cardnumber}
+                            onChange={(e) =>
+                                setCreditCardValues(prevValues => ({...prevValues, cardnumber: e.target.value}))}
+                            required
+                            placeholder="Enter card number"
+                            maxLength="19"
+                            pattern="[0-9\s]{13,19}"
+                        />
+                    </div>
+                    <div className="secret-form-group">
+                        <label>Expiration Date</label>
+                        <input
+                            type="text"
+                            name="expiration"
+                            value={creditCardValues.expiration}
+                            onChange={(e) =>
+                                setCreditCardValues(prevValues => ({...prevValues, expiration: e.target.value}))}
+                            required
+                            placeholder="MM/YY"
+                            maxLength="5"
+                            pattern="(0[1-9]|1[0-2])\/([0-9]{2})"
+                        />
+                    </div>
+                    <div className="secret-form-group">
+                        <label>CVV</label>
+                        <input
+                            type="text"
+                            name="cvv"
+                            value={creditCardValues.cvv}
+                            onChange={(e) =>
+                                setCreditCardValues(prevValues => ({...prevValues, cvv: e.target.value}))}
+                            required
+                            placeholder="Enter CVV"
+                            maxLength="4"
+                            pattern="[0-9]{3,4}"
+                        />
+                    </div>
+                    <div className="secret-form-actions">
+                        <button type="submit">Save Credit Card</button>
+                    </div>
+                    {errorMessage && <p className="error-message">{errorMessage}</p>}
+                </div>
             </form>
         </div>
     );
