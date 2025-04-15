@@ -14,7 +14,7 @@ const Secrets = ({loginValues}) => {
     useEffect(() => {
         const fetchSecrets = async () => {
             setErrorMessage('');
-            if( ! loginValues.email){
+            if (!loginValues.email) {
                 console.error('Secrets: No valid email, please do login first:' + loginValues);
                 setErrorMessage("No valid email, please do login first.");
             } else {
@@ -38,9 +38,18 @@ const Secrets = ({loginValues}) => {
                     <h3>Credential</h3>
                 </div>
                 <div className="card-content">
-                    <p><strong>Website:</strong> {content.url}</p>
-                    <p><strong>Username:</strong> {content.userName}</p>
-                    <p><strong>Password:</strong> {content.password}</p>
+                    <p>
+                        <strong>Website</strong>
+                        <span>{content.url}</span>
+                    </p>
+                    <p>
+                        <strong>Username</strong>
+                        <span>{content.userName}</span>
+                    </p>
+                    <p>
+                        <strong>Password</strong>
+                        <span>{content.password}</span>
+                    </p>
                 </div>
             </div>
         );
@@ -53,9 +62,22 @@ const Secrets = ({loginValues}) => {
                     <h3>Credit Card</h3>
                 </div>
                 <div className="card-content">
-                    <p><strong>Card Number:</strong> {content.cardnumber}</p>
-                    <p><strong>CVV:</strong> {content.cvv}</p>
-                    <p><strong>Expiry:</strong> {content.expiration}</p>
+                    <p>
+                        <strong>Card Number</strong>
+                        <span>{content.cardnumber}</span>
+                    </p>
+                    <p>
+                        <strong>Card Type</strong>
+                        <span>{content.cardtype}</span>
+                    </p>
+                    <p>
+                        <strong>Expiry Date</strong>
+                        <span>{content.expiration}</span>
+                    </p>
+                    <p>
+                        <strong>CVV</strong>
+                        <span>{content.cvv}</span>
+                    </p>
                 </div>
             </div>
         );
@@ -68,8 +90,14 @@ const Secrets = ({loginValues}) => {
                     <h3>Note</h3>
                 </div>
                 <div className="card-content">
-                    <p><strong>Title:</strong> {content.title}</p>
-                    <p><strong>Content:</strong> {content.content}</p>
+                    <p>
+                        <strong>Title</strong>
+                        <span>{content.title}</span>
+                    </p>
+                    <p>
+                        <strong>Content</strong>
+                        <span>{content.content}</span>
+                    </p>
                 </div>
             </div>
         );
