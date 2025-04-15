@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {postUser} from "../../comunication/FetchUser";
+import "../../css/Styles.css";
 
 /**
  * RegisterUser
@@ -43,72 +44,68 @@ function RegisterUser({loginValues, setLoginValues}) {
     };
 
     return (
-        <div>
-            <h2>Register user</h2>
+        <div className="form-container">
+            <h2>Register</h2>
             <form onSubmit={handleSubmit}>
-                <section>
-                <aside>
-                    <div>
-                        <label>Firstname:</label>
+                <div className="form-section">
+                    <div className="form-group">
+                        <label>First Name</label>
                         <input
                             type="text"
                             value={credentials.firstName}
                             onChange={(e) =>
                                 setCredentials(prevValues => ({...prevValues, firstName: e.target.value}))}
                             required
-                            placeholder="Please enter your firstname *"
+                            placeholder="Enter your first name"
                         />
                     </div>
-                    <div>
-                        <label>Lastname:</label>
+                    <div className="form-group">
+                        <label>Last Name</label>
                         <input
                             type="text"
                             value={credentials.lastName}
                             onChange={(e) =>
                                 setCredentials(prevValues => ({...prevValues, lastName: e.target.value}))}
                             required
-                            placeholder="Please enter your lastname *"
+                            placeholder="Enter your last name"
                         />
                     </div>
-                    <div>
-                        <label>Email:</label>
+                    <div className="form-group">
+                        <label>Email</label>
                         <input
-                            type="text"
+                            type="email"
                             value={credentials.email}
                             onChange={(e) =>
                                 setCredentials(prevValues => ({...prevValues, email: e.target.value}))}
                             required
-                            placeholder="Please enter your email"
+                            placeholder="Enter your email"
                         />
                     </div>
-                </aside>
-                    <aside>
-                        <div>
-                            <label>Password:</label>
-                            <input
-                                type="text"
-                                value={credentials.password}
-                                onChange={(e) =>
-                                    setCredentials(prevValues => ({...prevValues, password: e.target.value}))}
-                                required
-                                placeholder="Please enter your pwd *"
-                            />
-                        </div>
-                        <div>
-                            <label>Password confirmation:</label>
-                            <input
-                                type="text"
-                                value={credentials.passwordConfirmation}
-                                onChange={(e) =>
-                                    setCredentials(prevValues => ({...prevValues, passwordConfirmation: e.target.value}))}
-                                required
-                                placeholder="Please confirm your pwd *"
-                            />
-                        </div>
-                    </aside>
-                </section>
+                    <div className="form-group">
+                        <label>Password</label>
+                        <input
+                            type="password"
+                            value={credentials.password}
+                            onChange={(e) =>
+                                setCredentials(prevValues => ({...prevValues, password: e.target.value}))}
+                            required
+                            placeholder="Enter your password"
+                        />
+                    </div>
+                    <div className="form-group">
+                        <label>Confirm Password</label>
+                        <input
+                            type="password"
+                            value={credentials.passwordConfirmation}
+                            onChange={(e) =>
+                                setCredentials(prevValues => ({...prevValues, passwordConfirmation: e.target.value}))}
+                            required
+                            placeholder="Confirm your password"
+                        />
+                    </div>
+                </div>
                 <button type="submit">Register</button>
-                {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
+                {errorMessage && <p className="error-message">{errorMessage}</p>}
             </form>
         </div>
     );
