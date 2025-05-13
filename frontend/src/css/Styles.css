@@ -127,7 +127,56 @@ nav ul li ul li a {
 nav ul li ul li a:hover {
     background-color: var(--background-color);
 }
+.password-requirements {
+    margin-top: 10px;
+    font-size: 0.9rem;
+}
 
+.password-requirements p {
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.password-requirements ul {
+    margin: 0;
+    padding-left: 5px;
+    list-style-type: none;
+}
+
+.password-requirements li {
+    margin-bottom: 6px;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+}
+
+.requirement-item {
+    display: flex;
+    align-items: center;
+}
+
+.checkbox-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    margin-right: 10px;
+    font-size: 14px;
+    border-radius: 3px;
+    transition: all 0.2s ease;
+}
+
+.checkbox-icon.checked {
+    color: white;
+    background-color: #4CAF50;
+    border: 1px solid #4CAF50;
+}
+
+.checkbox-icon:not(.checked) {
+    color: #777;
+    border: 1px solid #777;
+}
 /* Form Styles */
 .form-container {
     max-width: 600px;

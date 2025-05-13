@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, {useEffect, useState} from 'react';
+import {useNavigate} from 'react-router-dom';
 import {postUser} from "../../comunication/FetchUser";
 import "../../css/Styles.css";
+import isStrongPassword from "validator/es/lib/isStrongPassword";
 
 /**
  * RegisterUser
@@ -10,6 +11,20 @@ import "../../css/Styles.css";
 function RegisterUser({loginValues, setLoginValues}) {
     const navigate = useNavigate();
 
+    let options = {
+        minLength: 8,
+        minLowercase: 1,
+        minUppercase: 1,
+        minNumbers: 1,
+        minSymbols: 1,
+        returnScore: false,
+        pointsPerUnique: 1,
+        pointsPerRepeat: 0.5,
+        pointsForContainingLower: 10,
+        pointsForContainingUpper: 10,
+        pointsForContainingNumber: 10,
+        pointsForContainingSymbol: 10
+    };
     const initialState = {
         firstName: "",
         lastName: "",
@@ -20,15 +35,48 @@ function RegisterUser({loginValues, setLoginValues}) {
     };
     const [credentials, setCredentials] = useState(initialState);
     const [errorMessage, setErrorMessage] = useState('');
+    const [passwordStrength, setPasswordStrength] = useState({
+        minLength: false,
+        hasLowercase: false,
+        hasUppercase: false,
+        hasNumber: false,
+        hasSymbol: false
+    });
+
+    useEffect(() => {
+        if (credentials.password) {
+            setPasswordStrength({
+                minLength: credentials.password.length >= 8,
+                hasLowercase: /[a-z]/.test(credentials.password),
+                hasUppercase: /[A-Z]/.test(credentials.password),
+                hasNumber: /[0-9]/.test(credentials.password),
+                hasSymbol: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(credentials.password)
+            });
+        } else {
+            setPasswordStrength({
+                minLength: false,
+                hasLowercase: false,
+                hasUppercase: false,
+                hasNumber: false,
+                hasSymbol: false
+            });
+        }
+    }, [credentials.password]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setErrorMessage('');
 
         //validate
-        if(credentials.password !== credentials.passwordConfirmation) {
+        if (credentials.password !== credentials.passwordConfirmation) {
             console.log("password != passwordConfirmation");
             setErrorMessage('Password and password-confirmation are not equal.');
+            return;
+        }
+
+        if (!isStrongPassword(credentials.password, options)) {
+            console.log("password is not strong");
+            setErrorMessage('Password does not meet the strength requirements. Please check the criteria.');
             return;
         }
 
@@ -42,6 +90,11 @@ function RegisterUser({loginValues, setLoginValues}) {
             setErrorMessage(error.message);
         }
     };
+
+    const getRequirementStyle = (isValid) => ({
+        color: isValid ? 'green' : '#777',
+        fontWeight: isValid ? 'bold' : 'normal'
+    });
 
     return (
         <div className="form-container">
@@ -91,6 +144,51 @@ function RegisterUser({loginValues, setLoginValues}) {
                             required
                             placeholder="Enter your password"
                         />
+                        <div className="password-requirements">
+                            <p>Password requirements:</p>
+                            <ul>
+                                <li className="requirement-item">
+                                    <span className={`checkbox-icon ${passwordStrength.minLength ? 'checked' : ''}`}>
+                                        {passwordStrength.minLength ? '✓' : '◻'}
+                                    </span>
+                                    <span style={getRequirementStyle(passwordStrength.minLength)}>
+                                        At least 8 characters
+                                    </span>
+                                </li>
+                                <li className="requirement-item">
+                                    <span className={`checkbox-icon ${passwordStrength.hasLowercase ? 'checked' : ''}`}>
+                                        {passwordStrength.hasLowercase ? '✓' : '◻'}
+                                    </span>
+                                    <span style={getRequirementStyle(passwordStrength.hasLowercase)}>
+                                        At least 1 lowercase letter
+                                    </span>
+                                </li>
+                                <li className="requirement-item">
+                                    <span className={`checkbox-icon ${passwordStrength.hasUppercase ? 'checked' : ''}`}>
+                                        {passwordStrength.hasUppercase ? '✓' : '◻'}
+                                    </span>
+                                    <span style={getRequirementStyle(passwordStrength.hasUppercase)}>
+                                        At least 1 uppercase letter
+                                    </span>
+                                </li>
+                                <li className="requirement-item">
+                                    <span className={`checkbox-icon ${passwordStrength.hasNumber ? 'checked' : ''}`}>
+                                        {passwordStrength.hasNumber ? '✓' : '◻'}
+                                    </span>
+                                    <span style={getRequirementStyle(passwordStrength.hasNumber)}>
+                                        At least 1 number
+                                    </span>
+                                </li>
+                                <li className="requirement-item">
+                                    <span className={`checkbox-icon ${passwordStrength.hasSymbol ? 'checked' : ''}`}>
+                                        {passwordStrength.hasSymbol ? '✓' : '◻'}
+                                    </span>
+                                    <span style={getRequirementStyle(passwordStrength.hasSymbol)}>
+                                        At least 1 special character (e.g., !@#$%^&*)
+                                    </span>
+                                </li>
+                            </ul>
+                        </div>
                     </div>
                     <div className="form-group">
                         <label>Confirm Password</label>
