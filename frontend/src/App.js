@@ -1,7 +1,6 @@
 import React, {useState} from 'react';
 import {BrowserRouter, Route, Routes} from "react-router-dom";
 import './App.css';
-import './css/mvp.css';
 import Home from './pages/Home';
 import Layout from "./pages/Layout";
 import NoPage from "./pages/NoPage";

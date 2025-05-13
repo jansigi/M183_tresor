@@ -1,4 +1,5 @@
 import { Outlet, Link } from "react-router-dom";
+import "../css/Styles.css";
 
 /**
  * Layout
@@ -8,29 +9,32 @@ const Layout = ({loginValues}) => {
     return (
         <>
             <nav>
-                <h1>The secret tresor application</h1>
-                <p>{loginValues.email === '' ? 'No user logged in' : 'user:' + loginValues.email}</p>
+                <div className="nav-brand">
+                    <h1>The Secret Tresor</h1>
+                    <p className="user-info">{loginValues.email === '' ? 'No user logged in' : `Logged in as: ${loginValues.email}`}</p>
+                </div>
                 <ul>
-                    <li><a href="/">Secrets</a>
-                    <ul>
-                        <li><Link to="/secret/secrets">my secrets</Link></li>
-                        <li><Link to="/secret/newcredential">new credential</Link></li>
-                        <li><Link to="/secret/newcreditcard">new credit-card</Link></li>
-                        <li><Link to="/secret/newnote">new note</Link></li>
-                    </ul>
-                    </li>
-                    <li><a href="/">User</a>
-                    <ul>
-                        <li><Link to="/user/login">login</Link></li>
-                        <li><Link to="/user/register">register</Link></li>
-                    </ul>
-                    </li>
-                    <li><a href="/">Admin</a>
+                    <li>
+                        <Link to="/">Secrets</Link>
                         <ul>
-                            <li><Link to="/user/users">All users</Link></li>
-                            <li>Add user</li>
-                            <li><Link to="/user/users/:id">Edit user</Link></li>
-                            <li>All secrets</li>
+                            <li><Link to="/secret/secrets">My Secrets</Link></li>
+                            <li><Link to="/secret/newcredential">New Credential</Link></li>
+                            <li><Link to="/secret/newcreditcard">New Credit Card</Link></li>
+                            <li><Link to="/secret/newnote">New Note</Link></li>
+                        </ul>
+                    </li>
+                    <li>
+                        <Link to="/">User</Link>
+                        <ul>
+                            <li><Link to="/user/login">Login</Link></li>
+                            <li><Link to="/user/register">Register</Link></li>
+                        </ul>
+                    </li>
+                    <li>
+                        <Link to="/">Admin</Link>
+                        <ul>
+                            <li><Link to="/user/users">All Users</Link></li>
+                            <li><Link to="/user/users/:id">Edit User</Link></li>
                         </ul>
                     </li>
                     <li>
@@ -38,8 +42,9 @@ const Layout = ({loginValues}) => {
                     </li>
                 </ul>
             </nav>
-            <hr/>
-            <Outlet/>
+            <main className="main-content">
+                <Outlet/>
+            </main>
         </>
     )
 };

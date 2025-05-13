@@ -1,4 +1,5 @@
 import '../../App.css';
+import '../../css/Users.css';
 import React, {useEffect, useState} from "react";
 import {getUsers} from "../../comunication/FetchUser";
 
@@ -25,15 +26,32 @@ const Users = ({loginValues}) => {
     }, [loginValues]);
 
     return (
-        <>
-            <h1>Client list</h1>
-            <ul>
-                {users.map(user => (
-                    <li key={user.id}>{user.id} {user.firstName} {user.lastName} - {user.email} - {user.password}</li>
-                ))}
-            </ul>
-            {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
-        </>
+        <div className="users-container">
+            <h1>Client List</h1>
+            {errorMessage && <p className="error-message">{errorMessage}</p>}
+            <div className="users-table-container">
+                <table className="users-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Password</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {users.map(user => (
+                            <tr key={user.id}>
+                                <td>{user.id}</td>
+                                <td>{user.firstName} {user.lastName}</td>
+                                <td>{user.email}</td>
+                                <td>{user.password}</td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+        </div>
     );
 };
 

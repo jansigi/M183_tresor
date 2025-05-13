@@ -1,4 +1,5 @@
 import '../../App.css';
+import '../../css/Secrets.css';
 import React, {useEffect, useState} from 'react';
 import {getSecretsforUser} from "../../comunication/FetchSecrets";
 
@@ -13,7 +14,7 @@ const Secrets = ({loginValues}) => {
     useEffect(() => {
         const fetchSecrets = async () => {
             setErrorMessage('');
-            if( ! loginValues.email){
+            if (!loginValues.email) {
                 console.error('Secrets: No valid email, please do login first:' + loginValues);
                 setErrorMessage("No valid email, please do login first.");
             } else {
@@ -30,40 +31,108 @@ const Secrets = ({loginValues}) => {
         fetchSecrets();
     }, [loginValues]);
 
+    const renderCredentialCard = (content) => {
+        return (
+            <div className="secret-card credential-card">
+                <div className="card-header">
+                    <h3>Credential</h3>
+                </div>
+                <div className="card-content">
+                    <p>
+                        <strong>Website</strong>
+                        <span>{content.url}</span>
+                    </p>
+                    <p>
+                        <strong>Username</strong>
+                        <span>{content.userName}</span>
+                    </p>
+                    <p>
+                        <strong>Password</strong>
+                        <span>{content.password}</span>
+                    </p>
+                </div>
+            </div>
+        );
+    };
+
+    const renderCreditCard = (content) => {
+        return (
+            <div className="secret-card credit-card">
+                <div className="card-header">
+                    <h3>Credit Card</h3>
+                </div>
+                <div className="card-content">
+                    <p>
+                        <strong>Card Number</strong>
+                        <span>{content.cardnumber}</span>
+                    </p>
+                    <p>
+                        <strong>Card Type</strong>
+                        <span>{content.cardtype}</span>
+                    </p>
+                    <p>
+                        <strong>Expiry Date</strong>
+                        <span>{content.expiration}</span>
+                    </p>
+                    <p>
+                        <strong>CVV</strong>
+                        <span>{content.cvv}</span>
+                    </p>
+                </div>
+            </div>
+        );
+    };
+
+    const renderNote = (content) => {
+        return (
+            <div className="secret-card note-card">
+                <div className="card-header">
+                    <h3>Note</h3>
+                </div>
+                <div className="card-content">
+                    <p>
+                        <strong>Title</strong>
+                        <span>{content.title}</span>
+                    </p>
+                    <p>
+                        <strong>Content</strong>
+                        <span>{content.content}</span>
+                    </p>
+                </div>
+            </div>
+        );
+    };
+
+    const renderSecret = (secret) => {
+        const content = JSON.parse(secret.content)
+        switch(content.kindid) {
+            case 1:
+                return renderCredentialCard(content);
+            case 2:
+                return renderCreditCard(content);
+            case 3:
+                return renderNote(content);
+            default:
+                return null;
+        }
+    };
+
     return (
-        <>
-            <h1>my secrets</h1>
-            {errorMessage && <p style={{color: 'red'}}>{errorMessage}</p>}
-             <form>
-                <h2>secrets</h2>
-                <table border="1">
-                    <thead>
-                    <tr>
-                        <th>secret id</th>
-                        <th>user id</th>
-                        <th>content</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {secrets?.length > 0 ? (
-                        secrets.map(secret => (
-                            <tr key={secret.id}>
-                                <td>{secret.id}</td>
-                                <td>{secret.userId}</td>
-                                <td>
-                                    <pre>{JSON.stringify(secret.content, null, 2)}</pre>
-                                </td>
-                            </tr>
-                        ))
-                    ) : (
-                        <tr>
-                            <td colSpan="3">No secrets available</td>
-                        </tr>
-                    )}
-                    </tbody>
-                </table>
-            </form>
-        </>
+        <div className="secrets-container">
+            <h1>My Secrets</h1>
+            {errorMessage && <p className="error-message">{errorMessage}</p>}
+            <div className="secrets-grid">
+                {secrets?.length > 0 ? (
+                    secrets.map(secret => (
+                        <div key={secret.id} className="secret-item">
+                            {renderSecret(secret)}
+                        </div>
+                    ))
+                ) : (
+                    <p className="no-secrets">No secrets available</p>
+                )}
+            </div>
+        </div>
     );
 };
 

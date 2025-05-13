@@ -1,6 +1,7 @@
 import {useNavigate} from 'react-router-dom';
 import {loginUser} from "../../comunication/LoginUserCall";
 import React, {useState} from "react";
+import "../../css/Styles.css";
 
 /**
  * LoginUser
@@ -9,6 +10,14 @@ import React, {useState} from "react";
 function LoginUser({loginValues, setLoginValues}) {
     const navigate = useNavigate();
     const [errorMessage, setErrorMessage] = useState('');
+
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setLoginValues(prev => ({
+            ...prev,
+            [name]: value
+        }));
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -23,37 +32,35 @@ function LoginUser({loginValues, setLoginValues}) {
     };
 
     return (
-        <div>
-            <h2>Login user</h2>
+        <div className="form-container">
+            <h2>Login</h2>
             <form onSubmit={handleSubmit}>
-                <section>
-                    <aside>
-                        <div>
-                            <label>Email:</label>
-                            <input
-                                type="text"
-                                value={loginValues.email}
-                                onChange={(e) =>
-                                    setLoginValues(prevValues => ({...prevValues, email: e.target.value}))}
-                                required
-                                placeholder="Please enter your email *"
-                            />
-                        </div>
-                        <div>
-                            <label>Password:</label>
-                            <input
-                                type="text"
-                                value={loginValues.password}
-                                onChange={(e) =>
-                                    setLoginValues(prevValues => ({...prevValues, password: e.target.value}))}
-                                required
-                                placeholder="Please enter your password *"
-                            />
-                        </div>
-                    </aside>
-                </section>
+                <div className="form-section">
+                    <div className="form-group">
+                        <label>Email</label>
+                        <input
+                            type="text"
+                            name="email"
+                            value={loginValues.email}
+                            onChange={handleInputChange}
+                            required
+                            placeholder="Enter your email"
+                        />
+                    </div>
+                    <div className="form-group">
+                        <label>Password</label>
+                        <input
+                            type="text"
+                            name="password"
+                            value={loginValues.password}
+                            onChange={handleInputChange}
+                            required
+                            placeholder="Enter your password"
+                        />
+                    </div>
+                </div>
                 <button type="submit">Login</button>
-                {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
+                {errorMessage && <p className="error-message">{errorMessage}</p>}
             </form>
         </div>
     );
