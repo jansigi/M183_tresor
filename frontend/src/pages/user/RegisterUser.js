@@ -10,6 +10,8 @@ import isStrongPassword from "validator/es/lib/isStrongPassword";
  */
 function RegisterUser({loginValues, setLoginValues}) {
     const navigate = useNavigate();
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
     let options = {
         minLength: 8,
@@ -136,52 +138,63 @@ function RegisterUser({loginValues, setLoginValues}) {
                     </div>
                     <div className="form-group">
                         <label>Password</label>
-                        <input
-                            type="password"
-                            value={credentials.password}
-                            onChange={(e) =>
-                                setCredentials(prevValues => ({...prevValues, password: e.target.value}))}
-                            required
-                            placeholder="Enter your password"
-                        />
+                        <div className="password-input-container">
+                            <input
+                                type={showPassword ? "text" : "password"}
+                                value={credentials.password}
+                                onChange={(e) =>
+                                    setCredentials(prevValues => ({...prevValues, password: e.target.value}))}
+                                required
+                                placeholder="Enter your password"
+                            />
+                            <button
+                                type="button"
+                                className="password-toggle-btn"
+                                onClick={() => setShowPassword(!showPassword)}
+                            >
+                                <span className="eye-icon">
+                                    {showPassword ? "👁️" : "👁️‍🗨️"}
+                                </span>
+                            </button>
+                        </div>
                         <div className="password-requirements">
                             <p>Password requirements:</p>
                             <ul>
                                 <li className="requirement-item">
-                                    <span className={`checkbox-icon ${passwordStrength.minLength ? 'checked' : ''}`}>
-                                        {passwordStrength.minLength ? '✓' : '◻'}
+                                    <span className={`checkbox-icon ${passwordStrength.minLength ? 'checked' : 'unchecked'}`}>
+                                        {passwordStrength.minLength ? '✓' : '✗'}
                                     </span>
                                     <span style={getRequirementStyle(passwordStrength.minLength)}>
                                         At least 8 characters
                                     </span>
                                 </li>
                                 <li className="requirement-item">
-                                    <span className={`checkbox-icon ${passwordStrength.hasLowercase ? 'checked' : ''}`}>
-                                        {passwordStrength.hasLowercase ? '✓' : '◻'}
+                                    <span className={`checkbox-icon ${passwordStrength.hasLowercase ? 'checked' : 'unchecked'}`}>
+                                        {passwordStrength.hasLowercase ? '✓' : '✗'}
                                     </span>
                                     <span style={getRequirementStyle(passwordStrength.hasLowercase)}>
                                         At least 1 lowercase letter
                                     </span>
                                 </li>
                                 <li className="requirement-item">
-                                    <span className={`checkbox-icon ${passwordStrength.hasUppercase ? 'checked' : ''}`}>
-                                        {passwordStrength.hasUppercase ? '✓' : '◻'}
+                                    <span className={`checkbox-icon ${passwordStrength.hasUppercase ? 'checked' : 'unchecked'}`}>
+                                        {passwordStrength.hasUppercase ? '✓' : '✗'}
                                     </span>
                                     <span style={getRequirementStyle(passwordStrength.hasUppercase)}>
                                         At least 1 uppercase letter
                                     </span>
                                 </li>
                                 <li className="requirement-item">
-                                    <span className={`checkbox-icon ${passwordStrength.hasNumber ? 'checked' : ''}`}>
-                                        {passwordStrength.hasNumber ? '✓' : '◻'}
+                                    <span className={`checkbox-icon ${passwordStrength.hasNumber ? 'checked' : 'unchecked'}`}>
+                                        {passwordStrength.hasNumber ? '✓' : '✗'}
                                     </span>
                                     <span style={getRequirementStyle(passwordStrength.hasNumber)}>
                                         At least 1 number
                                     </span>
                                 </li>
                                 <li className="requirement-item">
-                                    <span className={`checkbox-icon ${passwordStrength.hasSymbol ? 'checked' : ''}`}>
-                                        {passwordStrength.hasSymbol ? '✓' : '◻'}
+                                    <span className={`checkbox-icon ${passwordStrength.hasSymbol ? 'checked' : 'unchecked'}`}>
+                                        {passwordStrength.hasSymbol ? '✓' : '✗'}
                                     </span>
                                     <span style={getRequirementStyle(passwordStrength.hasSymbol)}>
                                         At least 1 special character (e.g., !@#$%^&*)
@@ -192,14 +205,25 @@ function RegisterUser({loginValues, setLoginValues}) {
                     </div>
                     <div className="form-group">
                         <label>Confirm Password</label>
-                        <input
-                            type="password"
-                            value={credentials.passwordConfirmation}
-                            onChange={(e) =>
-                                setCredentials(prevValues => ({...prevValues, passwordConfirmation: e.target.value}))}
-                            required
-                            placeholder="Confirm your password"
-                        />
+                        <div className="password-input-container">
+                            <input
+                                type={showConfirmPassword ? "text" : "password"}
+                                value={credentials.passwordConfirmation}
+                                onChange={(e) =>
+                                    setCredentials(prevValues => ({...prevValues, passwordConfirmation: e.target.value}))}
+                                required
+                                placeholder="Confirm your password"
+                            />
+                            <button
+                                type="button"
+                                className="password-toggle-btn"
+                                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                            >
+                                <span className="eye-icon">
+                                    {showConfirmPassword ? "👁️" : "👁️‍🗨️"}
+                                </span>
+                            </button>
+                        </div>
                     </div>
                 </div>
                 <button type="submit">Register</button>

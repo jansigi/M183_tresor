@@ -10,6 +10,7 @@ import "../../css/Styles.css";
 function LoginUser({loginValues, setLoginValues}) {
     const navigate = useNavigate();
     const [errorMessage, setErrorMessage] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -17,6 +18,10 @@ function LoginUser({loginValues, setLoginValues}) {
             ...prev,
             [name]: value
         }));
+    };
+
+    const togglePasswordVisibility = () => {
+        setShowPassword(!showPassword);
     };
 
     const handleSubmit = async (e) => {
@@ -49,14 +54,25 @@ function LoginUser({loginValues, setLoginValues}) {
                     </div>
                     <div className="form-group">
                         <label>Password</label>
-                        <input
-                            type="text"
-                            name="password"
-                            value={loginValues.password}
-                            onChange={handleInputChange}
-                            required
-                            placeholder="Enter your password"
-                        />
+                        <div className="password-input-container">
+                            <input
+                                type={showPassword ? "text" : "password"}
+                                name="password"
+                                value={loginValues.password}
+                                onChange={handleInputChange}
+                                required
+                                placeholder="Enter your password"
+                            />
+                            <button
+                                type="button"
+                                className="password-toggle-btn"
+                                onClick={togglePasswordVisibility}
+                            >
+                                <span className="eye-icon">
+                                    {showPassword ? "👁️" : "👁️‍🗨️"}
+                                </span>
+                            </button>
+                        </div>
                     </div>
                 </div>
                 <button type="submit">Login</button>

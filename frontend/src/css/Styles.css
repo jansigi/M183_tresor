@@ -173,9 +173,45 @@ nav ul li ul li a:hover {
     border: 1px solid #4CAF50;
 }
 
-.checkbox-icon:not(.checked) {
-    color: #777;
-    border: 1px solid #777;
+.checkbox-icon.unchecked {
+    color: #999;
+    border: 1px solid #ccc;
+    background-color: transparent;
+}
+
+.password-input-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.password-input-container input {
+    width: 100%;
+}
+
+.password-toggle-btn {
+    position: absolute;
+    right: 10px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.eye-icon {
+    font-size: 1.2rem;
+    color: #555;
+}
+
+.password-toggle-btn:hover .eye-icon {
+    color: #333;
+}
+
+.password-toggle-btn:focus {
+    outline: none;
 }
 /* Form Styles */
 .form-container {
