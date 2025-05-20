@@ -78,6 +78,15 @@ public class UserController {
         }
         System.out.println("UserController.createUser: input validation passed");
 
+        // Passwortstärke überprüfen
+        if (!isStrongPassword(registerUser.getPassword())) {
+            JsonObject obj = new JsonObject();
+            obj.addProperty("message", "Password does not meet the strength requirements.");
+            String json = new Gson().toJson(obj);
+            System.out.println("UserController.createUser, password validation failed: " + json);
+            return ResponseEntity.badRequest().body(json);
+        }
+
         //transform registerUser to user
         String newSalt = encryptUtil.generateSalt();
         User user = new User(
@@ -223,4 +232,11 @@ public class UserController {
         return ResponseEntity.accepted().body(json);
     }
 
+    private boolean isStrongPassword(String password) {
+        return password.length() >= 8 &&
+                password.matches(".*[a-z].*") &&
+                password.matches(".*[A-Z].*") &&
+                password.matches(".*[0-9].*") &&
+                password.matches(".*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?].*");
+    }
 }
