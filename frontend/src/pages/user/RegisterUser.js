@@ -3,6 +3,8 @@ import {useNavigate} from 'react-router-dom';
 import {postUser} from "../../comunication/FetchUser";
 import "../../css/Styles.css";
 import isStrongPassword from "validator/es/lib/isStrongPassword";
+import ReCAPTCHA from "react-google-recaptcha";
+import {RECAPTCHA_SITE_KEY} from "../../config/recaptcha";
 
 /**
  * RegisterUser
@@ -12,6 +14,7 @@ function RegisterUser({loginValues, setLoginValues}) {
     const navigate = useNavigate();
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const [recaptchaValue, setRecaptchaValue] = useState(null);
 
     let options = {
         minLength: 8,
@@ -65,9 +68,18 @@ function RegisterUser({loginValues, setLoginValues}) {
         }
     }, [credentials.password]);
 
+    const handleRecaptchaChange = (value) => {
+        setRecaptchaValue(value);
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setErrorMessage('');
+
+        if (!recaptchaValue) {
+            setErrorMessage('Please complete the reCAPTCHA verification');
+            return;
+        }
 
         //validate
         if (credentials.password !== credentials.passwordConfirmation) {
@@ -83,7 +95,7 @@ function RegisterUser({loginValues, setLoginValues}) {
         }
 
         try {
-            await postUser(credentials);
+            await postUser({...credentials, recaptchaToken: recaptchaValue});
             setLoginValues({userName: credentials.email, password: credentials.password});
             setCredentials(initialState);
             navigate('/');
@@ -153,7 +165,7 @@ function RegisterUser({loginValues, setLoginValues}) {
                                 onClick={() => setShowPassword(!showPassword)}
                             >
                                 <span className="eye-icon">
-                                    {showPassword ? "👁️" : "👁️‍🗨️"}
+                                    {showPassword ? "👁️‍🗨️" : "👁️"}
                                 </span>
                             </button>
                         </div>
@@ -220,10 +232,16 @@ function RegisterUser({loginValues, setLoginValues}) {
                                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                             >
                                 <span className="eye-icon">
-                                    {showConfirmPassword ? "👁️" : "👁️‍🗨️"}
+                                    {showConfirmPassword ? "👁️‍🗨️️" : "👁️"}
                                 </span>
                             </button>
                         </div>
+                    </div>
+                    <div className="form-group">
+                        <ReCAPTCHA
+                            sitekey={RECAPTCHA_SITE_KEY}
+                            onChange={handleRecaptchaChange}
+                        />
                     </div>
                 </div>
                 <button type="submit">Register</button>

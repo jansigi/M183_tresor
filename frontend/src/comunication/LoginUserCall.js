@@ -3,40 +3,20 @@
  * @author Jan Sigrist
  */
 
+import axios from 'axios';
 
-export const loginUser = async (email, password) => {
-    const protocol = process.env.REACT_APP_API_PROTOCOL; // "http"
-    const host = process.env.REACT_APP_API_HOST; // "localhost"
-    const port = process.env.REACT_APP_API_PORT; // "8080"
-    const path = process.env.REACT_APP_API_PATH; // "/api"
-    const portPart = port ? `:${port}` : ''; // port is optional
-    const API_URL = `${protocol}://${host}${portPart}${path}`;
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080/api';
 
+export const loginUser = async (email, password, recaptchaToken) => {
     try {
-        const response = await fetch(`${API_URL}/users/login`, {
-            method: 'Post',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                email: email,
-                password: password
-            })
+        console.log('recaptchaToken:', recaptchaToken);
+        const response = await axios.post(`${API_URL}/users/login`, {
+            email,
+            password,
+            recaptchaToken
         });
-
-        if (response.status === 401) {
-            const errorData = await response.json();
-            throw new Error(errorData.message);
-        } else if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.message || 'Server response failed.');
-        }
-
-        const data = await response.json();
-        console.log('User successfully logged in:', data);
-        return data;
+        return response.data;
     } catch (error) {
-        console.error('Failed to login user:', error.message);
-        throw new Error('Failed to login user. ' || error.message);
+        throw new Error(error.response?.data?.message || 'Login failed');
     }
-}
+};

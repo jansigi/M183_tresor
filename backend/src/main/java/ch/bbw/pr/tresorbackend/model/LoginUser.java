@@ -1,21 +1,29 @@
 package ch.bbw.pr.tresorbackend.model;
 
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.Size;
-import lombok.Value;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 /**
  * RegisterUser
  *
  * @author Jan Sigrist
  */
-@Value
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class LoginUser {
-    @NotEmpty(message = "E-Mail is required.")
+    @NotBlank(message = "Email is required")
+    @Email(message = "Invalid email format")
     private String email;
 
-    @NotEmpty(message = "Password is required.")
+    @NotBlank(message = "Password is required")
     private String password;
 
+    @NotBlank(message = "reCAPTCHA token is required")
     private String recaptchaToken;
 }

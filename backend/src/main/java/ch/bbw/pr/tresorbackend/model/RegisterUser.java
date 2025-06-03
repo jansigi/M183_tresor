@@ -1,33 +1,39 @@
 package ch.bbw.pr.tresorbackend.model;
 
-import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
-import lombok.Value;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 /**
  * RegisterUser
  *
  * @author Peter Rutschmann
  */
-@Value
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class RegisterUser {
 
-    @NotEmpty(message = "Firstname is required.")
-    @Size(min = 2, max = 25, message = "Firstname size has to be 2 up to 25 characters.")
+    @NotBlank(message = "First name is required")
+    @Size(min = 2, max = 50, message = "First name must be between 2 and 50 characters")
     private String firstName;
 
-    @NotEmpty(message = "Lastname is required.")
-    @Size(min = 2, max = 25, message = "Lastname size has to be 2 up to 25 characters.")
+    @NotBlank(message = "Last name is required")
+    @Size(min = 2, max = 50, message = "Last name must be between 2 and 50 characters")
     private String lastName;
 
-    @NotEmpty(message = "E-Mail is required.")
+    @NotBlank(message = "Email is required")
+    @Email(message = "Invalid email format")
     private String email;
 
-    @NotEmpty(message = "Password is required.")
+    @NotBlank(message = "Password is required")
     private String password;
 
-    @NotEmpty(message = "Password-confirmation is required.")
-    private String passwordConfirmation;
-
+    @NotBlank(message = "reCAPTCHA token is required")
     private String recaptchaToken;
 }

@@ -2,6 +2,7 @@ package ch.bbw.pr.tresorbackend.controller;
 
 import ch.bbw.pr.tresorbackend.model.*;
 import ch.bbw.pr.tresorbackend.service.PasswordEncryptionService;
+import ch.bbw.pr.tresorbackend.service.RecaptchaService;
 import ch.bbw.pr.tresorbackend.service.UserService;
 import ch.bbw.pr.tresorbackend.util.EncryptUtil;
 import com.google.gson.Gson;
@@ -18,7 +19,6 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * UserController
@@ -32,6 +32,7 @@ public class UserController {
 
     private UserService userService;
     private PasswordEncryptionService passwordService;
+    private RecaptchaService recaptchaService;
     private final ConfigProperties configProperties;
     private EncryptUtil encryptUtil;
     private static final Logger logger = LoggerFactory.getLogger(UserController.class);
@@ -40,6 +41,7 @@ public class UserController {
     public UserController(ConfigProperties configProperties,
                           UserService userService,
                           PasswordEncryptionService passwordService,
+                          RecaptchaService recaptchaService,
                           EncryptUtil encryptUtil) {
         this.configProperties = configProperties;
         System.out.println("UserController.UserController: cross origin: " + configProperties.getOrigin());
@@ -48,6 +50,7 @@ public class UserController {
         logger.debug("UserController.UserController: Cross Origin Config: {}", configProperties.getOrigin());
         this.userService = userService;
         this.passwordService = passwordService;
+        this.recaptchaService = recaptchaService;
         this.encryptUtil = encryptUtil;
     }
 
@@ -55,8 +58,14 @@ public class UserController {
     @CrossOrigin(origins = "${CROSS_ORIGIN}")
     @PostMapping
     public ResponseEntity<String> createUser(@Valid @RequestBody RegisterUser registerUser, BindingResult bindingResult) {
-        //captcha
-        //todo ergänzen
+        //captcha verification
+        logger.info("recaptcha token: {}", registerUser.getRecaptchaToken());
+        if (!recaptchaService.verifyReCaptcha(registerUser.getRecaptchaToken())) {
+            JsonObject obj = new JsonObject();
+            obj.addProperty("message", "reCAPTCHA verification failed");
+            String json = new Gson().toJson(obj);
+            return ResponseEntity.badRequest().body(json);
+        }
 
         System.out.println("UserController.createUser: captcha passed.");
 
@@ -107,12 +116,18 @@ public class UserController {
         return ResponseEntity.accepted().body(json);
     }
 
-    // build login   User REST API
+    // build login User REST API
     @CrossOrigin(origins = "${CROSS_ORIGIN}")
     @PostMapping("/login")
     public ResponseEntity<String> loginUser(@Valid @RequestBody LoginUser loginUser, BindingResult bindingResult) {
-        //captcha
-        //todo ergänzen
+        //captcha verification
+        logger.info("recaptcha token: {}", loginUser.getRecaptchaToken());
+        if (!recaptchaService.verifyReCaptcha(loginUser.getRecaptchaToken())) {
+            JsonObject obj = new JsonObject();
+            obj.addProperty("message", "reCAPTCHA verification failed");
+            String json = new Gson().toJson(obj);
+            return ResponseEntity.badRequest().body(json);
+        }
 
         System.out.println("UserController.loginUser: captcha passed.");
 
@@ -199,7 +214,7 @@ public class UserController {
         if (bindingResult.hasErrors()) {
             List<String> errors = bindingResult.getFieldErrors().stream()
                     .map(fieldError -> fieldError.getField() + ": " + fieldError.getDefaultMessage())
-                    .collect(Collectors.toList());
+                    .toList();
             System.out.println("UserController.createUser " + errors);
 
             JsonArray arr = new JsonArray();

@@ -1,7 +1,9 @@
 import {useNavigate} from 'react-router-dom';
 import {loginUser} from "../../comunication/LoginUserCall";
-import React, {useState} from "react";
+import React, {useRef, useState} from "react";
 import "../../css/Styles.css";
+import ReCAPTCHA from "react-google-recaptcha";
+import {RECAPTCHA_SITE_KEY} from "../../config/recaptcha";
 
 /**
  * LoginUser
@@ -11,6 +13,8 @@ function LoginUser({loginValues, setLoginValues}) {
     const navigate = useNavigate();
     const [errorMessage, setErrorMessage] = useState('');
     const [showPassword, setShowPassword] = useState(false);
+    const [recaptchaValue, setRecaptchaValue] = useState(null);
+    const recaptchaRef = useRef(null)
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -24,14 +28,26 @@ function LoginUser({loginValues, setLoginValues}) {
         setShowPassword(!showPassword);
     };
 
+    const handleRecaptchaChange = (value) => {
+        setRecaptchaValue(value);
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
+        
+        if (!recaptchaValue) {
+            setErrorMessage('Please complete the reCAPTCHA verification');
+            return;
+        }
+
         try {
-            const user = await loginUser(loginValues.email, loginValues.password);
+            const user = await loginUser(loginValues.email, loginValues.password, recaptchaValue);
             console.log(user)
             navigate('/');
         } catch (error) {
             console.error('Failed to fetch to server:', error.message);
+            recaptchaRef.current.reset()
+            setRecaptchaValue(null)
             setErrorMessage(error.message);
         }
     };
@@ -69,10 +85,17 @@ function LoginUser({loginValues, setLoginValues}) {
                                 onClick={togglePasswordVisibility}
                             >
                                 <span className="eye-icon">
-                                    {showPassword ? "👁️" : "👁️‍🗨️"}
+                                    {showPassword ? "👁️‍🗨️" : "👁️"}
                                 </span>
                             </button>
                         </div>
+                    </div>
+                    <div className="form-group">
+                        <ReCAPTCHA
+                            sitekey={RECAPTCHA_SITE_KEY}
+                            ref = {recaptchaRef}
+                            onChange={handleRecaptchaChange}
+                        />
                     </div>
                 </div>
                 <button type="submit">Login</button>
