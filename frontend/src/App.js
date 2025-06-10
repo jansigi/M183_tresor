@@ -11,6 +11,8 @@ import Secrets from "./pages/secret/Secrets";
 import NewCredential from "./pages/secret/NewCredential";
 import NewCreditCard from "./pages/secret/NewCreditCard";
 import NewNote from "./pages/secret/NewNote";
+import ForgotPassword from './pages/user/ForgotPassword';
+import ResetPassword from './pages/user/ResetPassword';
 
 /**
  * App
@@ -33,6 +35,8 @@ function App() {
                     <Route path="/secret/newcredential" element={<NewCredential loginValues={loginValues}/>}/>
                     <Route path="/secret/newcreditcard" element={<NewCreditCard loginValues={loginValues}/>}/>
                     <Route path="/secret/newnote" element={<NewNote loginValues={loginValues}/>}/>
+                    <Route path="/forgot-password" element={<ForgotPassword />} />
+                    <Route path="/reset-password" element={<ResetPassword />} />
                     <Route path="*" element={<NoPage/>}/>
                 </Route>
             </Routes>

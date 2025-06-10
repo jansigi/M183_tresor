@@ -4,6 +4,7 @@ import ch.bbw.pr.tresorbackend.model.*;
 import ch.bbw.pr.tresorbackend.service.PasswordEncryptionService;
 import ch.bbw.pr.tresorbackend.service.RecaptchaService;
 import ch.bbw.pr.tresorbackend.service.UserService;
+import ch.bbw.pr.tresorbackend.service.PasswordResetService;
 import ch.bbw.pr.tresorbackend.util.EncryptUtil;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
@@ -18,6 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -35,6 +37,7 @@ public class UserController {
     private RecaptchaService recaptchaService;
     private final ConfigProperties configProperties;
     private EncryptUtil encryptUtil;
+    private final PasswordResetService passwordResetService;
     private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
     @Autowired
@@ -42,7 +45,8 @@ public class UserController {
                           UserService userService,
                           PasswordEncryptionService passwordService,
                           RecaptchaService recaptchaService,
-                          EncryptUtil encryptUtil) {
+                          EncryptUtil encryptUtil,
+                          PasswordResetService passwordResetService) {
         this.configProperties = configProperties;
         System.out.println("UserController.UserController: cross origin: " + configProperties.getOrigin());
         // Logging in the constructor
@@ -52,6 +56,7 @@ public class UserController {
         this.passwordService = passwordService;
         this.recaptchaService = recaptchaService;
         this.encryptUtil = encryptUtil;
+        this.passwordResetService = passwordResetService;
     }
 
     // build create User REST API
@@ -245,6 +250,67 @@ public class UserController {
         String json = new Gson().toJson(obj);
         System.out.println("UserController.getUserIdByEmail " + json);
         return ResponseEntity.accepted().body(json);
+    }
+
+    @CrossOrigin(origins = "${CROSS_ORIGIN}")
+    @PostMapping("/forgot-password")
+    public ResponseEntity<String> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            JsonObject obj = new JsonObject();
+            obj.addProperty("message", "Invalid request");
+            return ResponseEntity.badRequest().body(new Gson().toJson(obj));
+        }
+
+        if (!recaptchaService.verifyReCaptcha(request.getRecaptchaToken())) {
+            JsonObject obj = new JsonObject();
+            obj.addProperty("message", "reCAPTCHA verification failed");
+            return ResponseEntity.badRequest().body(new Gson().toJson(obj));
+        }
+
+        try {
+            passwordResetService.requestPasswordReset(request.getEmail());
+            JsonObject obj = new JsonObject();
+            obj.addProperty("message", "If an account exists with this email, you will receive a password reset link.");
+            return ResponseEntity.ok(new Gson().toJson(obj));
+        } catch (IOException e) {
+            logger.error("Failed to send password reset email", e);
+            JsonObject obj = new JsonObject();
+            obj.addProperty("message", "Failed to process password reset request");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new Gson().toJson(obj));
+        }
+    }
+
+    @CrossOrigin(origins = "${CROSS_ORIGIN}")
+    @PostMapping("/reset-password")
+    public ResponseEntity<String> resetPassword(@Valid @RequestBody ResetPasswordRequest request, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            JsonObject obj = new JsonObject();
+            obj.addProperty("message", "Invalid request");
+            return ResponseEntity.badRequest().body(new Gson().toJson(obj));
+        }
+
+        if (!recaptchaService.verifyReCaptcha(request.getRecaptchaToken())) {
+            JsonObject obj = new JsonObject();
+            obj.addProperty("message", "reCAPTCHA verification failed");
+            return ResponseEntity.badRequest().body(new Gson().toJson(obj));
+        }
+
+        if (!isStrongPassword(request.getNewPassword())) {
+            JsonObject obj = new JsonObject();
+            obj.addProperty("message", "Password does not meet the strength requirements");
+            return ResponseEntity.badRequest().body(new Gson().toJson(obj));
+        }
+
+        boolean success = passwordResetService.resetPassword(request.getToken(), request.getNewPassword());
+        if (!success) {
+            JsonObject obj = new JsonObject();
+            obj.addProperty("message", "Invalid or expired reset token");
+            return ResponseEntity.badRequest().body(new Gson().toJson(obj));
+        }
+
+        JsonObject obj = new JsonObject();
+        obj.addProperty("message", "Password has been reset successfully");
+        return ResponseEntity.ok(new Gson().toJson(obj));
     }
 
     private boolean isStrongPassword(String password) {

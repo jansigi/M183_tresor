@@ -1,0 +1,16 @@
+package ch.bbw.pr.tresorbackend.model;
+
+import jakarta.validation.constraints.NotBlank;
+import lombok.Data;
+
+@Data
+public class ResetPasswordRequest {
+    @NotBlank(message = "Token is required")
+    private String token;
+
+    @NotBlank(message = "New password is required")
+    private String newPassword;
+
+    @NotBlank(message = "reCAPTCHA token is required")
+    private String recaptchaToken;
+} 

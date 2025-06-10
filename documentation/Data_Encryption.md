@@ -27,3 +27,23 @@ Die reihenfolge ist: salt + password + pepper
 - AES ist ein symmetrischer Verschlüsselungsalgorithmus, der einen geheimen Schlüssel verwendet, um Daten zu verschlüsseln und zu entschlüsseln.
 - Ich benutze für das Password den MasterKey mit dem Salt des Benutzers.
 - Der MasterKey lade ich aus der Konfiguration.
+
+## ReCAPTCHA
+- ReCAPTCHA ist ein Dienst von Google, der verwendet wird, um sicherzustellen, dass ein Benutzer ein Mensch und kein Bot ist.
+- Es wird verwendet, um zu verhindern, dass automatisierte Angriffe auf die Anwendung durchgeführt werden.
+
+## Passwort Policy
+- Die Passwort Policy legt fest, welche Anforderungen an Passwörter gestellt werden müssen, um die Sicherheit zu erhöhen.
+- Die Passwort Policy kann folgende Anforderungen enthalten:
+  - Mindestlänge des Passworts
+  - Verwendung von Gross- und Kleinbuchstaben
+  - Verwendung von Zahlen
+  - Verwendung von Sonderzeichen
+
+## Passwort Reset
+- Der Passwort Reset ist ein Prozess, der es einem Benutzer ermöglicht, sein Passwort zurückzusetzen, wenn er es vergessen hat.
+- Diese Schritte werden durchgeführt:
+  1. Der Benutzer gibt seine E-Mail-Adresse ein.
+  2. Ein Link zum Zurücksetzen des Passworts wird an die E-Mail-Adresse gesendet über SendGrid.
+  3. Der Benutzer klickt auf den Link und wird zu einer Seite weitergeleitet, auf der er ein neues Passwort eingeben kann.
+  4. Das neue Passwort wird gehasht und in der Datenbank gespeichert.

@@ -44,7 +44,7 @@ public class EncryptUtil {
         return localEncryptor.decrypt(encrypted);
     }
 
-    public String generateSalt() {
+    public static String generateSalt() {
         byte[] salt = new byte[32];
         new SecureRandom().nextBytes(salt);
         return Base64.getEncoder().encodeToString(salt);

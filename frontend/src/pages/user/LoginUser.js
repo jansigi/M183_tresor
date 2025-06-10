@@ -100,6 +100,9 @@ function LoginUser({loginValues, setLoginValues}) {
                 </div>
                 <button type="submit">Login</button>
                 {errorMessage && <p className="error-message">{errorMessage}</p>}
+                <p className="form-footer">
+                    Forgot your password? <a href="/forgot-password" onClick={(e) => { e.preventDefault(); navigate('/forgot-password'); }}>Reset it here</a>
+                </p>
             </form>
         </div>
     );
