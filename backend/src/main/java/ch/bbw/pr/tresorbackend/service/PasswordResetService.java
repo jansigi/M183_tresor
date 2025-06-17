@@ -188,9 +188,7 @@ public class PasswordResetService {
             }
 
             User user = resetToken.getUser();
-            String newSalt = EncryptUtil.generateSalt();
-            user.setSalt(newSalt);
-            user.setPassword(passwordService.hashPassword(newPassword, newSalt));
+            user.setPassword(passwordService.hashPassword(newPassword, user.getSalt()));
             
             try {
                 userRepository.save(user);

@@ -102,7 +102,7 @@ public class UserController {
         }
 
         //transform registerUser to user
-        String newSalt = encryptUtil.generateSalt();
+        String newSalt = EncryptUtil.generateSalt();
         User user = new User(
                 null,
                 registerUser.getFirstName(),
