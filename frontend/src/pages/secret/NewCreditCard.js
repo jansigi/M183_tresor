@@ -7,7 +7,7 @@ import "../../css/Styles.css";
  * NewCreditCard
  * @author Peter Rutschmann
  */
-function NewCreditCard({loginValues}) {
+function NewCreditCard() {
     const initialState = {
         kindid: 2,
         kind:"creditcard",
@@ -26,7 +26,7 @@ function NewCreditCard({loginValues}) {
         setErrorMessage('');
         try {
             const content = creditCardValues;
-            await postSecret({loginValues, content});
+            await postSecret({content});
             setCreditCardValues(initialState);
             navigate('/secret/secrets');
         } catch (error) {

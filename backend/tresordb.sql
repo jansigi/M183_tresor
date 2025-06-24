@@ -82,3 +82,30 @@ CREATE TABLE password_reset_token
     used       BOOLEAN DEFAULT FALSE,
     CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES user (id) ON DELETE CASCADE
 );
+
+CREATE TABLE roles (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(50) NOT NULL UNIQUE
+);
+
+CREATE TABLE user_roles (
+    user_id BIGINT,
+    role_id BIGINT,
+    PRIMARY KEY (user_id, role_id),
+    FOREIGN KEY (user_id) REFERENCES user (id),
+    FOREIGN KEY (role_id) REFERENCES roles (id)
+);
+
+-- Insert default roles
+INSERT INTO roles (name) VALUES ('USER');
+INSERT INTO roles (name) VALUES ('ROLE_ADMIN');
+
+-- Add a default admin user (password: Admin123!)
+INSERT INTO user (first_name, last_name, email, password)
+VALUES ('Admin', 'User', 'admin@tresor.ch', '$2a$10$YourHashedPasswordHere');
+
+-- Assign admin role to the admin user
+INSERT INTO user_roles (user_id, role_id)
+SELECT u.id, r.id
+FROM user u, roles r
+WHERE u.email = 'admin@tresor.ch' AND r.name = 'ROLE_ADMIN';

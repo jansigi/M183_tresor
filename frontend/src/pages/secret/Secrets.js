@@ -1,35 +1,36 @@
 import '../../App.css';
 import '../../css/Secrets.css';
 import React, {useEffect, useState} from 'react';
-import {getSecretsforUser} from "../../comunication/FetchSecrets";
+import {getSecretsForUser} from "../../comunication/FetchSecrets";
 
 /**
  * Secrets
  * @author Peter Rutschmann
  */
-const Secrets = ({loginValues}) => {
+const Secrets = () => {
     const [secrets, setSecrets] = useState([]);
     const [errorMessage, setErrorMessage] = useState('');
 
-    useEffect(() => {
-        const fetchSecrets = async () => {
-            setErrorMessage('');
-            if (!loginValues.email) {
-                console.error('Secrets: No valid email, please do login first:' + loginValues);
-                setErrorMessage("No valid email, please do login first.");
-            } else {
-                try {
-                    const data = await getSecretsforUser(loginValues);
-                    console.log(data);
-                    setSecrets(data);
-                } catch (error) {
-                    console.error('Failed to fetch to server:', error.message);
-                    setErrorMessage(error.message);
-                }
+    const fetchSecrets = async () => {
+        setErrorMessage('');
+        if (!localStorage.getItem("token")) {
+            console.error('Secrets: No valid token');
+            setErrorMessage("No valid token, please do login first.");
+        } else {
+            try {
+                const data = await getSecretsForUser();
+                console.log(data)
+                setSecrets(data);
+            } catch (error) {
+                console.error('Failed to fetch to server:', error.message);
+                setErrorMessage(error.message);
             }
-        };
+        }
+    };
+
+    useEffect(() => {
         fetchSecrets();
-    }, [loginValues]);
+    }, []);
 
     const renderCredentialCard = (content) => {
         return (

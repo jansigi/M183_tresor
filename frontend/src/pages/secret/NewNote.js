@@ -7,7 +7,7 @@ import "../../css/Styles.css";
  * NewNote
  * @author Peter Rutschmann
  */
-function NewNote({loginValues}) {
+function NewNote() {
     const initialState = {
         kindid: 3,
         kind:"note",
@@ -24,7 +24,7 @@ function NewNote({loginValues}) {
         setErrorMessage('');
         try {
             const content = noteValues;
-            await postSecret({loginValues, content});
+            await postSecret({content});
             setNoteValues(initialState);
             navigate('/secret/secrets');
         } catch (error) {

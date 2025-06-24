@@ -37,6 +37,7 @@ const Users = ({loginValues}) => {
                             <th>Name</th>
                             <th>Email</th>
                             <th>Password</th>
+                            <th>Roles</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -46,6 +47,7 @@ const Users = ({loginValues}) => {
                                 <td>{user.firstName} {user.lastName}</td>
                                 <td>{user.email}</td>
                                 <td>{user.password}</td>
+                                <td>{user.roles.map(role => role.name).join(', ')}</td>
                             </tr>
                         ))}
                     </tbody>

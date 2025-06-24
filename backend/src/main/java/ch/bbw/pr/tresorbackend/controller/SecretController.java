@@ -1,9 +1,7 @@
 package ch.bbw.pr.tresorbackend.controller;
 
-import ch.bbw.pr.tresorbackend.model.EncryptCredentials;
-import ch.bbw.pr.tresorbackend.model.NewSecret;
-import ch.bbw.pr.tresorbackend.model.Secret;
-import ch.bbw.pr.tresorbackend.model.User;
+import ch.bbw.pr.tresorbackend.model.*;
+import ch.bbw.pr.tresorbackend.service.JwtService;
 import ch.bbw.pr.tresorbackend.service.SecretService;
 import ch.bbw.pr.tresorbackend.service.UserService;
 import ch.bbw.pr.tresorbackend.util.EncryptUtil;
@@ -19,6 +17,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -32,13 +31,14 @@ import java.util.stream.Collectors;
 public class SecretController {
 
     private SecretService secretService;
+    private JwtService jwtService;
     private UserService userService;
     private EncryptUtil encryptUtil;
 
     // create secret REST API
     @CrossOrigin(origins = "${CROSS_ORIGIN}")
     @PostMapping
-    public ResponseEntity<String> createSecret2(@Valid @RequestBody NewSecret newSecret, BindingResult bindingResult) {
+    public ResponseEntity<String> createSecret(@Valid @RequestBody NewSecret newSecret, BindingResult bindingResult) {
         //input validation
         if (bindingResult.hasErrors()) {
             List<String> errors = bindingResult.getFieldErrors().stream()
@@ -57,7 +57,7 @@ public class SecretController {
         }
         System.out.println("SecretController.createSecret, input validation passed");
 
-        User user = userService.findByEmail(newSecret.getEmail());
+        User user = userService.getUserById(jwtService.extractUserId(newSecret.getToken()));
 
         //transfer secret and encrypt content
         Secret secret = new Secret(
@@ -98,6 +98,33 @@ public class SecretController {
         }
 
         System.out.println("SecretController.getSecretsByUserId " + secrets);
+        return ResponseEntity.ok(secrets);
+    }
+
+    // Build Get Secrets by token REST API
+    @CrossOrigin(origins = "${CROSS_ORIGIN}")
+    @PostMapping("/bytoken")
+    public ResponseEntity<List<Secret>> getSecretsByEmail(@RequestBody TokenWrapper tokenWrapper) {
+        System.out.println("SecretController.getSecretsByEmail " + tokenWrapper);
+
+        User user = userService.getUserById(jwtService.extractUserId(tokenWrapper.getToken()));
+
+        List<Secret> secrets = secretService.getSecretsByUserId(user.getId());
+        if (secrets.isEmpty()) {
+            System.out.println("SecretController.getSecretsByEmail secret isEmpty");
+            return ResponseEntity.notFound().build();
+        }
+        //Decrypt content
+        for (Secret secret : secrets) {
+            try {
+                secret.setContent(encryptUtil.decrypt(secret.getContent(), user.getSalt()));
+            } catch (EncryptionOperationNotPossibleException e) {
+                System.out.println("SecretController.getSecretsByEmail " + e + " " + secret);
+                secret.setContent("not encryptable. Wrong password?");
+            }
+        }
+
+        System.out.println("SecretController.getSecretsByEmail " + secrets);
         return ResponseEntity.ok(secrets);
     }
 
@@ -172,10 +199,10 @@ public class SecretController {
             System.out.println("SecretController.updateSecret failed:" + json);
             return ResponseEntity.badRequest().body(json);
         }
-        User user = userService.findByEmail(newSecret.getEmail());
+        User user = userService.findByEmail(newSecret.getToken());
 
         //check if Secret in db has not same userid
-        if (dbSecrete.getUserId() != user.getId()) {
+        if (!Objects.equals(dbSecrete.getUserId(), user.getId())) {
             System.out.println("SecretController.updateSecret, not same user id");
             JsonObject obj = new JsonObject();
             obj.addProperty("answer", "Secret has not same user id");
@@ -201,7 +228,7 @@ public class SecretController {
                 user.getId(),
                 encryptUtil.encrypt(newSecret.getContent().toString(), user.getSalt())
         );
-        Secret updatedSecret = secretService.updateSecret(secret);
+        secretService.updateSecret(secret);
         //save secret in db
         secretService.createSecret(secret);
         System.out.println("SecretController.updateSecret, secret updated in db");

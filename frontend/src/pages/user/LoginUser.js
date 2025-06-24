@@ -1,9 +1,9 @@
 import {useNavigate} from 'react-router-dom';
-import {loginUser} from "../../comunication/LoginUserCall";
 import React, {useRef, useState} from "react";
 import "../../css/Styles.css";
 import ReCAPTCHA from "react-google-recaptcha";
 import {RECAPTCHA_SITE_KEY} from "../../config/recaptcha";
+import AuthService from "../../services/authService";
 
 /**
  * LoginUser
@@ -41,8 +41,7 @@ function LoginUser({loginValues, setLoginValues}) {
         }
 
         try {
-            const user = await loginUser(loginValues.email, loginValues.password, recaptchaValue);
-            console.log(user)
+            await AuthService.login(loginValues.email, loginValues.password, recaptchaValue);
             navigate('/');
         } catch (error) {
             console.error('Failed to fetch to server:', error.message);

@@ -1,10 +1,7 @@
 package ch.bbw.pr.tresorbackend.controller;
 
 import ch.bbw.pr.tresorbackend.model.*;
-import ch.bbw.pr.tresorbackend.service.PasswordEncryptionService;
-import ch.bbw.pr.tresorbackend.service.RecaptchaService;
-import ch.bbw.pr.tresorbackend.service.UserService;
-import ch.bbw.pr.tresorbackend.service.PasswordResetService;
+import ch.bbw.pr.tresorbackend.service.*;
 import ch.bbw.pr.tresorbackend.util.EncryptUtil;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
@@ -21,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Set;
 
 /**
  * UserController
@@ -33,11 +31,13 @@ import java.util.List;
 public class UserController {
 
     private UserService userService;
+    private RoleService roleService;
     private PasswordEncryptionService passwordService;
     private RecaptchaService recaptchaService;
     private final ConfigProperties configProperties;
     private EncryptUtil encryptUtil;
     private final PasswordResetService passwordResetService;
+    private final JwtService jwtService;
     private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
     @Autowired
@@ -46,17 +46,19 @@ public class UserController {
                           PasswordEncryptionService passwordService,
                           RecaptchaService recaptchaService,
                           EncryptUtil encryptUtil,
-                          PasswordResetService passwordResetService) {
+                          PasswordResetService passwordResetService,
+                          RoleService roleService,
+                          JwtService jwtService) {
         this.configProperties = configProperties;
-        System.out.println("UserController.UserController: cross origin: " + configProperties.getOrigin());
-        // Logging in the constructor
-        logger.info("UserController initialized: " + configProperties.getOrigin());
+        logger.info("UserController initialized: {}", configProperties.getOrigin());
         logger.debug("UserController.UserController: Cross Origin Config: {}", configProperties.getOrigin());
         this.userService = userService;
         this.passwordService = passwordService;
         this.recaptchaService = recaptchaService;
         this.encryptUtil = encryptUtil;
         this.passwordResetService = passwordResetService;
+        this.jwtService = jwtService;
+        this.roleService = roleService;
     }
 
     // build create User REST API
@@ -109,10 +111,11 @@ public class UserController {
                 registerUser.getLastName(),
                 registerUser.getEmail(),
                 passwordService.hashPassword(registerUser.getPassword(), newSalt),
-                newSalt
+                newSalt,
+                Set.of(roleService.getUserRole())
         );
 
-        User savedUser = userService.createUser(user);
+        userService.createUser(user);
         System.out.println("UserController.createUser, user saved in db");
         JsonObject obj = new JsonObject();
         obj.addProperty("answer", "User Saved");
@@ -158,9 +161,13 @@ public class UserController {
         User foundUser = userService.findByEmail(loginUser.getEmail());
         if (foundUser != null && passwordService.matchPassword(loginUser.getPassword(), foundUser.getPassword(), foundUser.getSalt())) {
             System.out.println("UserController.loginUser, password validation passed");
+
+            // Generate JWT token
+            String token = jwtService.generateToken(foundUser.getId());
+
             JsonObject obj = new JsonObject();
-            obj.addProperty("userId", foundUser.getId());
-            obj.addProperty("salt", foundUser.getSalt());
+            obj.addProperty("token", token);
+            obj.add("roles", new Gson().toJsonTree(foundUser.getRoles().stream().map(Role::getName).toList()));
             String json = new Gson().toJson(obj);
             return ResponseEntity.accepted().body(json);
         } else {

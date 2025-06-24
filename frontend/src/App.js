@@ -1,6 +1,7 @@
 import React, {useState} from 'react';
 import {BrowserRouter, Route, Routes} from "react-router-dom";
 import './App.css';
+import './utils/axiosConfig';
 import Home from './pages/Home';
 import Layout from "./pages/Layout";
 import NoPage from "./pages/NoPage";
@@ -13,6 +14,7 @@ import NewCreditCard from "./pages/secret/NewCreditCard";
 import NewNote from "./pages/secret/NewNote";
 import ForgotPassword from './pages/user/ForgotPassword';
 import ResetPassword from './pages/user/ResetPassword';
+import PrivateRoute from './components/PrivateRoute';
 
 /**
  * App
@@ -27,16 +29,38 @@ function App() {
         <BrowserRouter>
             <Routes>
                 <Route path="/" element={<Layout loginValues={loginValues}/>}>
-                    <Route index element={<Home/>}/>/>
-                    <Route path="/user/users" element={<Users loginValues={loginValues}/>}/>
-                    <Route path="/user/login" element={<LoginUser loginValues={loginValues} setLoginValues={setLoginValues}/>}/>
-                    <Route path="/user/register" element={<RegisterUser loginValues={loginValues} setLoginValues={setLoginValues}/>}/>
-                    <Route path="/secret/secrets" element={<Secrets loginValues={loginValues}/>}/>
-                    <Route path="/secret/newcredential" element={<NewCredential loginValues={loginValues}/>}/>
-                    <Route path="/secret/newcreditcard" element={<NewCreditCard loginValues={loginValues}/>}/>
-                    <Route path="/secret/newnote" element={<NewNote loginValues={loginValues}/>}/>
-                    <Route path="/forgot-password" element={<ForgotPassword />} />
-                    <Route path="/reset-password" element={<ResetPassword />} />
+                    <Route index element={<Home/>}/>
+                    <Route path="user/users" element={
+                        <PrivateRoute requiredRole="ROLE_ADMIN">
+                            <Users loginValues={loginValues}/>
+                        </PrivateRoute>
+                    }/>
+                    <Route path="user/login"
+                           element={<LoginUser loginValues={loginValues} setLoginValues={setLoginValues}/>}/>
+                    <Route path="user/register"
+                           element={<RegisterUser loginValues={loginValues} setLoginValues={setLoginValues}/>}/>
+                    <Route path="secret/secrets" element={
+                        <PrivateRoute requiredRole="ROLE_USER">
+                            <Secrets/>
+                        </PrivateRoute>
+                    }/>
+                    <Route path="secret/newcredential" element={
+                        <PrivateRoute requiredRole="ROLE_USER">
+                            <NewCredential/>
+                        </PrivateRoute>
+                    }/>
+                    <Route path="secret/newcreditcard" element={
+                        <PrivateRoute requiredRole="ROLE_USER">
+                            <NewCreditCard/>
+                        </PrivateRoute>
+                    }/>
+                    <Route path="secret/newnote" element={
+                        <PrivateRoute requiredRole="ROLE_USER">
+                            <NewNote/>
+                        </PrivateRoute>
+                    }/>
+                    <Route path="forgot-password" element={<ForgotPassword/>}/>
+                    <Route path="reset-password" element={<ResetPassword/>}/>
                     <Route path="*" element={<NoPage/>}/>
                 </Route>
             </Routes>

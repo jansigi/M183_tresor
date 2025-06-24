@@ -5,16 +5,16 @@
 
 const API_URL = 'http://localhost:8080/api';
 
-export const postSecret = async ({loginValues, content}) => {
+export const postSecret = async ({content}) => {
     try {
         const response = await fetch(`${API_URL}/secrets`, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem("token")}`
             },
             body: JSON.stringify({
-                email: loginValues.email,
-                encryptPassword: loginValues.password,
+                token: localStorage.getItem("token"),
                 content: content
             })
         });
@@ -33,17 +33,16 @@ export const postSecret = async ({loginValues, content}) => {
     }
 };
 
-//get all secrets for a user identified by its email
-export const getSecretsforUser = async (loginValues) => {
+export const getSecretsForUser = async () => {
     try {
-        const response = await fetch(`${API_URL}/secrets/byemail`, {
+        const response = await fetch(`${API_URL}/secrets/bytoken`, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem("token")}`
             },
             body: JSON.stringify({
-                email: loginValues.email,
-                encryptPassword: loginValues.password
+                token: localStorage.getItem("token"),
             })
         });
 

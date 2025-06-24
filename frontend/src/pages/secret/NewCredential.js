@@ -7,7 +7,7 @@ import "../../css/Styles.css";
  * NewCredential
  * @author Peter Rutschmann
  */
-function NewCredential({loginValues}) {
+function NewCredential() {
     const initialState = {
         kindid: 1,
         kind:"credential",
@@ -23,10 +23,9 @@ function NewCredential({loginValues}) {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setErrorMessage('');
-        console.log(loginValues)
         try {
             const content = credentialValues;
-            await postSecret({loginValues, content});
+            await postSecret({content});
             setCredentialValues(initialState);
             navigate('/secret/secrets');
         } catch (error) {
