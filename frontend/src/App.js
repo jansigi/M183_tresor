@@ -15,6 +15,7 @@ import NewNote from "./pages/secret/NewNote";
 import ForgotPassword from './pages/user/ForgotPassword';
 import ResetPassword from './pages/user/ResetPassword';
 import PrivateRoute from './components/PrivateRoute';
+import OAuth2RedirectHandler from './pages/user/OAuth2RedirectHandler';
 
 /**
  * App
@@ -28,6 +29,7 @@ function App() {
     return (
         <BrowserRouter>
             <Routes>
+                <Route path="/oauth2/redirect" element={<OAuth2RedirectHandler />} />
                 <Route path="/" element={<Layout loginValues={loginValues}/>}>
                     <Route index element={<Home/>}/>
                     <Route path="user/users" element={

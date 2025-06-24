@@ -61,6 +61,16 @@ class AuthService {
             return null;
         }
     }
+
+    getUserEmail() {
+        const token = localStorage.getItem('token');
+        if (!token) return null;
+        const decodedToken = this.parseJwt(token);
+        if (decodedToken && decodedToken.email) {
+            return decodedToken.email;
+        }
+        return null;
+    }
 }
 
 export default new AuthService(); 

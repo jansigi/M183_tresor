@@ -10,6 +10,7 @@ const Layout = () => {
     const navigate = useNavigate();
     const isAuthenticated = authService.isAuthenticated();
     const isAdmin = authService.hasRole('ROLE_ADMIN');
+    const userEmail = authService.getUserEmail();
 
     const handleLogout = () => {
         authService.logout();
@@ -22,7 +23,7 @@ const Layout = () => {
                 <div className="nav-brand">
                     <h1>The Secret Tresor</h1>
                     <p className="user-info">
-                        {isAuthenticated ? 'Logged in' : 'No user logged in'}
+                        {isAuthenticated && userEmail ? `Logged in as ${userEmail}` : 'No user logged in'}
                     </p>
                 </div>
                 <ul>

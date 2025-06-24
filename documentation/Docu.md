@@ -47,3 +47,21 @@ Die reihenfolge ist: salt + password + pepper
   2. Ein Link zum Zurücksetzen des Passworts wird an die E-Mail-Adresse gesendet über SendGrid.
   3. Der Benutzer klickt auf den Link und wird zu einer Seite weitergeleitet, auf der er ein neues Passwort eingeben kann.
   4. Das neue Passwort wird gehasht und in der Datenbank gespeichert.
+
+## JWT (JSON Web Token)
+- Nach Login wird ein JWT erstellt.
+- Enthält Benutzer-ID, E-Mail und Rollen.
+- Wird im Frontend gespeichert und bei API-Anfragen mitgesendet.
+- Dient zur Authentifizierung und Autorisierung im Backend.
+- Der Token wird im Frontend im LocalStorage gespeichert und bei API-Anfragen im Authorization-Header mitgesendet.
+- Das Backend prüft und validiert den JWT bei jedem geschützten API-Aufruf, um die Identität und Berechtigungen des Benutzers zu überprüfen.
+- Die Gültigkeit des Tokens ist zeitlich begrenzt (Ablaufzeit im Token enthalten).
+
+## OAuth2 Login mit Google
+- OAuth2 ist ein offener Standard für Autorisierung, der es Benutzern ermöglicht, sich mit einem bestehenden Google-Konto sicher anzumelden, ohne ein neues Passwort zu erstellen.
+- Die app bietet einen "Login mit Google"-Button auf der Login-Seite.
+- Nach Klick auf den Button wird der Benutzer zu Google weitergeleitet, um die Anmeldung zu bestätigen.
+- Nach Authentifizierung sendet Google die Benutzerinformationen an die app zurück.
+- Die app erstellt daraufhin einen eigenen JWT-Token, der die E-Mail und Rollen des Benutzers enthält.
+- Der Benutzer ist nun eingeloggt und kann die app nutzen, ohne ein separates Passwort zu benötigen.
+- Neue Google-Nutzer werden beim ersten Login automatisch als Benutzer in der Datenbank angelegt.

@@ -1,5 +1,6 @@
 package ch.bbw.pr.tresorbackend.config;
 
+import ch.bbw.pr.tresorbackend.security.GoogleOAuth2SuccessHandler;
 import ch.bbw.pr.tresorbackend.security.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -31,14 +32,18 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/users/login", "/api/users", "/api/users/register",
-                                "/api/users/forgot-password", "/api/users/reset-password").permitAll()
+                                "/api/users/forgot-password", "/api/users/reset-password",
+                                "/oauth2/**", "/login/oauth2/**", "/oauth2/authorization/**").permitAll()
                         .requestMatchers("/api/secrets/**").hasAnyRole("USER", "ADMIN")
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+                .oauth2Login(oauth2 -> oauth2
+                        .successHandler(googleOAuth2SuccessHandler())
+                );
 
         return http.build();
     }
@@ -51,5 +56,10 @@ public class SecurityConfig {
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
+    }
+
+    @Bean
+    public GoogleOAuth2SuccessHandler googleOAuth2SuccessHandler() {
+        return new GoogleOAuth2SuccessHandler();
     }
 } 
