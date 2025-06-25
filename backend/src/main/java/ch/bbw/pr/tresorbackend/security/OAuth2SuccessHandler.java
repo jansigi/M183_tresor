@@ -17,7 +17,7 @@ import java.io.IOException;
 import java.util.Set;
 
 @Component
-public class GoogleOAuth2SuccessHandler implements AuthenticationSuccessHandler {
+public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
 
     @Autowired
     private UserService userService;
@@ -32,9 +32,33 @@ public class GoogleOAuth2SuccessHandler implements AuthenticationSuccessHandler 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {
         OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
-        String email = oAuth2User.getAttribute("email");
-        String firstName = oAuth2User.getAttribute("given_name");
-        String lastName = oAuth2User.getAttribute("family_name");
+        String email;
+        String firstName;
+        String lastName;
+
+        if (oAuth2User.getAttribute("login") != null) {
+            String githubLogin = oAuth2User.getAttribute("login");
+            String githubName = oAuth2User.getAttribute("name");
+            email = oAuth2User.getAttribute("email");
+            if (email == null) {
+                email = githubLogin + "@github.com";
+            }
+            if (githubName != null && githubName.contains(" ")) {
+                String[] parts = githubName.split(" ", 2);
+                firstName = parts[0];
+                lastName = parts[1];
+            } else if (githubName != null) {
+                firstName = githubName;
+                lastName = "";
+            } else {
+                firstName = githubLogin;
+                lastName = "";
+            }
+        } else {
+            email = oAuth2User.getAttribute("email");
+            firstName = oAuth2User.getAttribute("given_name");
+            lastName = oAuth2User.getAttribute("family_name");
+        }
 
         User user = userService.findByEmail(email);
         if (user == null) {
@@ -42,7 +66,7 @@ public class GoogleOAuth2SuccessHandler implements AuthenticationSuccessHandler 
             user.setFirstName(firstName);
             user.setLastName(lastName);
             user.setEmail(email);
-            user.setPassword(""); // No password for Google users
+            user.setPassword(""); // No password for OAuth2 users
             user.setSalt("");
             user.setRoles(Set.of(roleService.getUserRole()));
             user = userService.createUser(user);

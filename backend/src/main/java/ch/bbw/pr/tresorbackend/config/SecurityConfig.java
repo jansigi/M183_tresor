@@ -1,6 +1,6 @@
 package ch.bbw.pr.tresorbackend.config;
 
-import ch.bbw.pr.tresorbackend.security.GoogleOAuth2SuccessHandler;
+import ch.bbw.pr.tresorbackend.security.OAuth2SuccessHandler;
 import ch.bbw.pr.tresorbackend.security.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -42,7 +42,7 @@ public class SecurityConfig {
                 )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .oauth2Login(oauth2 -> oauth2
-                        .successHandler(googleOAuth2SuccessHandler())
+                        .successHandler(oAuth2SuccessHandler())
                 );
 
         return http.build();
@@ -59,7 +59,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    public GoogleOAuth2SuccessHandler googleOAuth2SuccessHandler() {
-        return new GoogleOAuth2SuccessHandler();
+    public OAuth2SuccessHandler oAuth2SuccessHandler() {
+        return new OAuth2SuccessHandler();
     }
 } 

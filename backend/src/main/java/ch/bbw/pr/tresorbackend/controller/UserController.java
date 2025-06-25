@@ -6,6 +6,8 @@ import ch.bbw.pr.tresorbackend.util.EncryptUtil;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
@@ -13,6 +15,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestRedirectFilter;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import org.springframework.security.oauth2.client.registration.ClientRegistration;
+import org.springframework.security.oauth2.client.web.DefaultOAuth2AuthorizationRequestResolver;
+import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
@@ -39,6 +46,7 @@ public class UserController {
     private final PasswordResetService passwordResetService;
     private final JwtService jwtService;
     private static final Logger logger = LoggerFactory.getLogger(UserController.class);
+    private final ClientRegistrationRepository clientRegistrationRepository;
 
     @Autowired
     public UserController(ConfigProperties configProperties,
@@ -48,7 +56,8 @@ public class UserController {
                           EncryptUtil encryptUtil,
                           PasswordResetService passwordResetService,
                           RoleService roleService,
-                          JwtService jwtService) {
+                          JwtService jwtService,
+                          ClientRegistrationRepository clientRegistrationRepository) {
         this.configProperties = configProperties;
         logger.info("UserController initialized: {}", configProperties.getOrigin());
         logger.debug("UserController.UserController: Cross Origin Config: {}", configProperties.getOrigin());
@@ -59,6 +68,7 @@ public class UserController {
         this.passwordResetService = passwordResetService;
         this.jwtService = jwtService;
         this.roleService = roleService;
+        this.clientRegistrationRepository = clientRegistrationRepository;
     }
 
     // build create User REST API
@@ -326,5 +336,29 @@ public class UserController {
                 password.matches(".*[A-Z].*") &&
                 password.matches(".*[0-9].*") &&
                 password.matches(".*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?].*");
+    }
+
+    // --- OAuth2 endpoints for Google and GitHub ---
+    @GetMapping("/oauth2/authorize/{provider}")
+    public void oauth2Authorize(@PathVariable String provider, HttpServletRequest request, HttpServletResponse response) throws IOException {
+        DefaultOAuth2AuthorizationRequestResolver resolver = new DefaultOAuth2AuthorizationRequestResolver(
+                clientRegistrationRepository, OAuth2AuthorizationRequestRedirectFilter.DEFAULT_AUTHORIZATION_REQUEST_BASE_URI);
+        OAuth2AuthorizationRequest authRequest = resolver.resolve(request, provider);
+        if (authRequest != null) {
+            response.sendRedirect(authRequest.getAuthorizationRequestUri());
+        } else {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Unknown OAuth2 provider: " + provider);
+        }
+    }
+
+    // Optional: explicit endpoints for Google and GitHub for clarity
+    @GetMapping("/oauth2/authorize/google")
+    public void oauth2AuthorizeGoogle(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        oauth2Authorize("google", request, response);
+    }
+
+    @GetMapping("/oauth2/authorize/github")
+    public void oauth2AuthorizeGithub(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        oauth2Authorize("github", request, response);
     }
 }
