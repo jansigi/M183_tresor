@@ -15,10 +15,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestRedirectFilter;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
-import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.client.web.DefaultOAuth2AuthorizationRequestResolver;
+import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestRedirectFilter;
 import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -41,34 +40,32 @@ public class UserController {
     private RoleService roleService;
     private PasswordEncryptionService passwordService;
     private RecaptchaService recaptchaService;
-    private final ConfigProperties configProperties;
-    private EncryptUtil encryptUtil;
     private final PasswordResetService passwordResetService;
     private final JwtService jwtService;
-    private static final Logger logger = LoggerFactory.getLogger(UserController.class);
     private final ClientRegistrationRepository clientRegistrationRepository;
+    private final TwoFactorService twoFactorService;
+    private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
     @Autowired
     public UserController(ConfigProperties configProperties,
                           UserService userService,
                           PasswordEncryptionService passwordService,
                           RecaptchaService recaptchaService,
-                          EncryptUtil encryptUtil,
                           PasswordResetService passwordResetService,
                           RoleService roleService,
                           JwtService jwtService,
-                          ClientRegistrationRepository clientRegistrationRepository) {
-        this.configProperties = configProperties;
+                          ClientRegistrationRepository clientRegistrationRepository,
+                          TwoFactorService twoFactorService) {
         logger.info("UserController initialized: {}", configProperties.getOrigin());
         logger.debug("UserController.UserController: Cross Origin Config: {}", configProperties.getOrigin());
         this.userService = userService;
         this.passwordService = passwordService;
         this.recaptchaService = recaptchaService;
-        this.encryptUtil = encryptUtil;
         this.passwordResetService = passwordResetService;
         this.jwtService = jwtService;
         this.roleService = roleService;
         this.clientRegistrationRepository = clientRegistrationRepository;
+        this.twoFactorService = twoFactorService;
     }
 
     // build create User REST API
@@ -138,7 +135,6 @@ public class UserController {
     @CrossOrigin(origins = "${CROSS_ORIGIN}")
     @PostMapping("/login")
     public ResponseEntity<String> loginUser(@Valid @RequestBody LoginUser loginUser, BindingResult bindingResult) {
-        //captcha verification
         logger.info("recaptcha token: {}", loginUser.getRecaptchaToken());
         if (!recaptchaService.verifyReCaptcha(loginUser.getRecaptchaToken())) {
             JsonObject obj = new JsonObject();
@@ -146,42 +142,32 @@ public class UserController {
             String json = new Gson().toJson(obj);
             return ResponseEntity.badRequest().body(json);
         }
-
-        System.out.println("UserController.loginUser: captcha passed.");
-
-        //input validation
         if (bindingResult.hasErrors()) {
             List<String> errors = bindingResult.getFieldErrors().stream()
                     .map(fieldError -> fieldError.getField() + ": " + fieldError.getDefaultMessage())
                     .toList();
-            System.out.println("UserController.loginUser " + errors);
-
             JsonArray arr = new JsonArray();
             errors.forEach(arr::add);
             JsonObject obj = new JsonObject();
             obj.add("message", arr);
             String json = new Gson().toJson(obj);
-
-            System.out.println("UserController.loginUser, validation fails: " + json);
             return ResponseEntity.badRequest().body(json);
         }
-        System.out.println("UserController.loginUser: input validation passed");
-
-        //password validation
         User foundUser = userService.findByEmail(loginUser.getEmail());
         if (foundUser != null && passwordService.matchPassword(loginUser.getPassword(), foundUser.getPassword(), foundUser.getSalt())) {
-            System.out.println("UserController.loginUser, password validation passed");
-
-            // Generate JWT token
-            String token = jwtService.generateToken(foundUser.getId());
-
+            try {
+                twoFactorService.generateAndSendCode(foundUser);
+            } catch (Exception e) {
+                logger.error("Failed to send 2FA code", e);
+                JsonObject obj = new JsonObject();
+                obj.addProperty("message", "Failed to send 2FA code");
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new Gson().toJson(obj));
+            }
             JsonObject obj = new JsonObject();
-            obj.addProperty("token", token);
-            obj.add("roles", new Gson().toJsonTree(foundUser.getRoles().stream().map(Role::getName).toList()));
-            String json = new Gson().toJson(obj);
-            return ResponseEntity.accepted().body(json);
+            obj.addProperty("twoFaRequired", true);
+            obj.addProperty("email", foundUser.getEmail());
+            return ResponseEntity.status(HttpStatus.ACCEPTED).body(new Gson().toJson(obj));
         } else {
-            System.out.println("UserController.loginUser, password validation failed");
             JsonObject obj = new JsonObject();
             obj.addProperty("message", "Invalid Login");
             String json = new Gson().toJson(obj);
@@ -330,6 +316,53 @@ public class UserController {
         return ResponseEntity.ok(new Gson().toJson(obj));
     }
 
+    @CrossOrigin(origins = "${CROSS_ORIGIN}")
+    @PostMapping("/2fa/verify")
+    public ResponseEntity<String> verify2fa(@RequestBody TwoFactorVerify body) {
+        User user = userService.findByEmail(body.getEmail());
+        if (user == null) {
+            JsonObject obj = new JsonObject();
+            obj.addProperty("message", "User not found");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Gson().toJson(obj));
+        }
+        boolean valid = twoFactorService.validateCode(user, body.getCode());
+        System.out.println("UserController.verify2fa: user=" + user.getEmail() + ", code=" + body.getCode() + ", valid=" + valid);
+        if (valid) {
+            String token = jwtService.generateToken(user.getId());
+            JsonObject obj = new JsonObject();
+            obj.addProperty("token", token);
+            obj.add("roles", new Gson().toJsonTree(user.getRoles().stream().map(Role::getName).toList()));
+            return ResponseEntity.ok(new Gson().toJson(obj));
+        } else {
+            JsonObject obj = new JsonObject();
+            obj.addProperty("message", "Invalid or expired 2FA code");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Gson().toJson(obj));
+        }
+    }
+
+    @CrossOrigin(origins = "${CROSS_ORIGIN}")
+    @PostMapping("/2fa/resend")
+    public ResponseEntity<String> resend2fa(@RequestBody JsonObject body) {
+        String email = body.get("email").getAsString();
+        User user = userService.findByEmail(email);
+        if (user == null) {
+            JsonObject obj = new JsonObject();
+            obj.addProperty("message", "User not found");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Gson().toJson(obj));
+        }
+        try {
+            twoFactorService.generateAndSendCode(user);
+            JsonObject obj = new JsonObject();
+            obj.addProperty("message", "A new code has been sent to your email.");
+            return ResponseEntity.ok(new Gson().toJson(obj));
+        } catch (Exception e) {
+            logger.error("Failed to resend 2FA code", e);
+            JsonObject obj = new JsonObject();
+            obj.addProperty("message", "Failed to resend 2FA code");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new Gson().toJson(obj));
+        }
+    }
+
     private boolean isStrongPassword(String password) {
         return password.length() >= 8 &&
                 password.matches(".*[a-z].*") &&
@@ -338,9 +371,16 @@ public class UserController {
                 password.matches(".*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?].*");
     }
 
-    // --- OAuth2 endpoints for Google and GitHub ---
-    @GetMapping("/oauth2/authorize/{provider}")
-    public void oauth2Authorize(@PathVariable String provider, HttpServletRequest request, HttpServletResponse response) throws IOException {
+    @GetMapping("/oauth2/authorize/google")
+    public void oauth2AuthorizeGoogle(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        oauth2Authorize("google", request, response);
+    }
+    @GetMapping("/oauth2/authorize/github")
+    public void oauth2AuthorizeGithub(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        oauth2Authorize("github", request, response);
+    }
+
+    private void oauth2Authorize(String provider, HttpServletRequest request, HttpServletResponse response) throws IOException {
         DefaultOAuth2AuthorizationRequestResolver resolver = new DefaultOAuth2AuthorizationRequestResolver(
                 clientRegistrationRepository, OAuth2AuthorizationRequestRedirectFilter.DEFAULT_AUTHORIZATION_REQUEST_BASE_URI);
         OAuth2AuthorizationRequest authRequest = resolver.resolve(request, provider);
@@ -349,16 +389,5 @@ public class UserController {
         } else {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Unknown OAuth2 provider: " + provider);
         }
-    }
-
-    // Optional: explicit endpoints for Google and GitHub for clarity
-    @GetMapping("/oauth2/authorize/google")
-    public void oauth2AuthorizeGoogle(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        oauth2Authorize("google", request, response);
-    }
-
-    @GetMapping("/oauth2/authorize/github")
-    public void oauth2AuthorizeGithub(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        oauth2Authorize("github", request, response);
     }
 }

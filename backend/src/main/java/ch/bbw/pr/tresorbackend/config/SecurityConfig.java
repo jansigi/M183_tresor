@@ -4,6 +4,7 @@ import ch.bbw.pr.tresorbackend.security.OAuth2SuccessHandler;
 import ch.bbw.pr.tresorbackend.security.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -32,9 +33,10 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/users/login", "/api/users", "/api/users/register",
-                                "/api/users/forgot-password", "/api/users/reset-password",
+                                "/api/users/forgot-password", "/api/users/reset-password", "api/users/2fa/**",
                                 "/oauth2/**", "/login/oauth2/**", "/oauth2/authorization/**").permitAll()
                         .requestMatchers("/api/secrets/**").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/users").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session

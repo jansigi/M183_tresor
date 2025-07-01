@@ -22,7 +22,7 @@ axios.interceptors.response.use(
         if (error.response && error.response.status === 401) {
             // If we get a 401 Unauthorized response, logout the user
             authService.logout();
-            window.location.href = '/login';
+            window.location.href = '/user/login';
         }
         return Promise.reject(error);
     }

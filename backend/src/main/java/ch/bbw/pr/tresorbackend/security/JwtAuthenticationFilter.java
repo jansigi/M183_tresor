@@ -40,12 +40,24 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         final Long userId;
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            // TODO: return unauthorized response
             filterChain.doFilter(request, response);
             return;
         }
 
         jwt = authHeader.substring(7);
-        userId = jwtService.extractUserId(jwt);
+
+        if (jwt.isBlank() || jwt.chars().filter(ch -> ch == '.').count() != 2) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        try {
+            userId = jwtService.extractUserId(jwt);
+        } catch (Exception e) {
+            filterChain.doFilter(request, response);
+            return;
+        }
 
         if (userId != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = this.userDetailsService.loadUserByUsername(userId.toString());

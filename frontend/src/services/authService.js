@@ -29,10 +29,10 @@ class AuthService {
     isAuthenticated() {
         const token = localStorage.getItem('token');
         if (!token) return false;
-        
+
         const decodedToken = this.parseJwt(token);
         if (!decodedToken) return false;
-        
+
         // Check if token is expired
         const currentTime = Date.now() / 1000;
         return decodedToken.exp > currentTime;
@@ -46,7 +46,7 @@ class AuthService {
     getAuthHeader() {
         const token = localStorage.getItem('token');
         if (token) {
-            return { Authorization: 'Bearer ' + token };
+            return {Authorization: 'Bearer ' + token};
         } else {
             return {};
         }
@@ -70,6 +70,19 @@ class AuthService {
             return decodedToken.email;
         }
         return null;
+    }
+
+    verify2Fa(email, code) {
+        return axios.post(`${API_URL}/users/2fa/verify`, {email, code})
+            .then(data => {
+                    console.log(data.data)
+                    if (data.data && data.data.token && data.data.roles) {
+                        localStorage.setItem('token', data.data.token);
+                        localStorage.setItem('roles', JSON.stringify(data.data.roles || []));
+                    }
+                    return data;
+                }
+            )
     }
 }
 

@@ -67,7 +67,7 @@ function ForgotPassword() {
                 {errorMessage && <p className="error-message">{errorMessage}</p>}
                 {successMessage && <p className="success-message">{successMessage}</p>}
                 <p className="form-footer">
-                    Remember your password? <a href="/login" onClick={(e) => { e.preventDefault(); navigate('/login'); }}>Login here</a>
+                    Remember your password? <a href="/login" onClick={(e) => { e.preventDefault(); navigate('/user/login'); }}>Login here</a>
                 </p>
             </form>
         </div>

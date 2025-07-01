@@ -16,6 +16,7 @@ import ForgotPassword from './pages/user/ForgotPassword';
 import ResetPassword from './pages/user/ResetPassword';
 import PrivateRoute from './components/PrivateRoute';
 import OAuth2RedirectHandler from './pages/user/OAuth2RedirectHandler';
+import TwoFactorAuth from './pages/user/TwoFactorAuth';
 
 /**
  * App
@@ -30,6 +31,7 @@ function App() {
         <BrowserRouter>
             <Routes>
                 <Route path="/oauth2/redirect" element={<OAuth2RedirectHandler />} />
+                <Route path="/2fa" element={<TwoFactorAuth />} />
                 <Route path="/" element={<Layout loginValues={loginValues}/>}>
                     <Route index element={<Home/>}/>
                     <Route path="user/users" element={

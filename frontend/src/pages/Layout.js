@@ -38,23 +38,22 @@ const Layout = () => {
                             </ul>
                         </li>
                     )}
-                    <li>
-                        <Link to="/">User</Link>
-                        <ul>
-                            {!isAuthenticated ? (
-                                <>
-                                    <li><Link to="user/login">Login</Link></li>
-                                    <li><Link to="user/register">Register</Link></li>
-                                </>
-                            ) : (
-                                <>
-                                    <li>
-                                        <button onClick={handleLogout}>Logout</button>
-                                    </li>
-                                </>
-                            )}
-                        </ul>
-                    </li>
+                    {!isAuthenticated ? (
+                            <li>
+                                <Link to="/">User</Link>
+                                <ul>
+                                    <>
+                                        <li><Link to="user/login">Login</Link></li>
+                                        <li><Link to="user/register">Register</Link></li>
+                                    </>
+                                </ul>
+                            </li>
+                        )
+                        : (
+                            <>
+                                <button onClick={handleLogout}>Logout</button>
+                            </>
+                        )}
                     {isAdmin && (
                         <li>
                             <Link to="/">Admin</Link>
