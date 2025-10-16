@@ -3,6 +3,7 @@ package ch.bbw.pr.tresorbackend.service;
 import ch.bbw.pr.tresorbackend.model.TwoFactorCode;
 import ch.bbw.pr.tresorbackend.model.User;
 import ch.bbw.pr.tresorbackend.repository.TwoFactorCodeRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -11,6 +12,7 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.Random;
 
+@Slf4j
 @Service
 public class TwoFactorService {
     private final TwoFactorCodeRepository twoFactorCodeRepository;
@@ -34,7 +36,7 @@ public class TwoFactorService {
         twoFactorCode.setUsed(false);
         twoFactorCode.setAttempts(0);
         twoFactorCodeRepository.save(twoFactorCode);
-        System.out.println("Generated 2FA code: " + code); // For debugging purposes
+        log.info("Generated 2FA code: {}", code); // For debugging purposes
         sendCodeEmail(user.getEmail(), code);
         return twoFactorCode;
     }

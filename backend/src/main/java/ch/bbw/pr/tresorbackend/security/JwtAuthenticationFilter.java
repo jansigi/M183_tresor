@@ -40,7 +40,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         final Long userId;
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            // TODO: return unauthorized response
             filterChain.doFilter(request, response);
             return;
         }

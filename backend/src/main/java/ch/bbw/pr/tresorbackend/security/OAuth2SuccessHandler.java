@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
@@ -25,6 +26,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 
+@Slf4j
 @Component
 public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
 
@@ -89,7 +91,7 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
                         }
                     }
                 } catch (Exception ex) {
-                    System.out.println("Failed to fetch email from GitHub API: " + ex.getMessage());
+                    log.info("Failed to fetch email from GitHub API: {}", ex.getMessage());
                 }
             }
             if (email == null) {

@@ -1,6 +1,7 @@
 package ch.bbw.pr.tresorbackend.service;
 
 import ch.bbw.pr.tresorbackend.model.Config;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Service;
  *
  * @author Peter Rutschmann
  */
+@Slf4j
 @Service
 public class PasswordEncryptionService {
     private final BCryptPasswordEncoder passwordEncoder;
@@ -27,9 +29,9 @@ public class PasswordEncryptionService {
         boolean isMatch = passwordEncoder.matches(salt + password + pepper, hashedPassword);
 
         if (isMatch) {
-            System.out.println("Password matches!");
+            log.info("Password matches!");
         } else {
-            System.out.println("Password does not match.");
+            log.info("Password does not match.");
         }
         return isMatch;
     }

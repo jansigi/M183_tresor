@@ -10,6 +10,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +32,7 @@ import java.util.Set;
  *
  * @author Peter Rutschmann
  */
+@Slf4j
 @RestController
 @AllArgsConstructor
 @RequestMapping("api/users")
@@ -81,14 +83,14 @@ public class UserController {
             return ResponseEntity.badRequest().body(json);
         }
 
-        System.out.println("UserController.createUser: captcha passed.");
+        log.info("UserController.createUser: captcha passed.");
 
         //input validation
         if (bindingResult.hasErrors()) {
             List<String> errors = bindingResult.getFieldErrors().stream()
                     .map(fieldError -> fieldError.getField() + ": " + fieldError.getDefaultMessage())
                     .toList();
-            System.out.println("UserController.createUser " + errors);
+            log.info("UserController.createUser {}", errors);
 
             JsonArray arr = new JsonArray();
             errors.forEach(arr::add);
@@ -96,17 +98,17 @@ public class UserController {
             obj.add("message", arr);
             String json = new Gson().toJson(obj);
 
-            System.out.println("UserController.createUser, validation fails: " + json);
+            log.info("UserController.createUser, validation fails: {}", json);
             return ResponseEntity.badRequest().body(json);
         }
-        System.out.println("UserController.createUser: input validation passed");
+        log.info("UserController.createUser: input validation passed");
 
         // Passwortstärke überprüfen
         if (!isStrongPassword(registerUser.getPassword())) {
             JsonObject obj = new JsonObject();
             obj.addProperty("message", "Password does not meet the strength requirements.");
             String json = new Gson().toJson(obj);
-            System.out.println("UserController.createUser, password validation failed: " + json);
+            log.info("UserController.createUser, password validation failed: {}", json);
             return ResponseEntity.badRequest().body(json);
         }
 
@@ -123,11 +125,11 @@ public class UserController {
         );
 
         userService.createUser(user);
-        System.out.println("UserController.createUser, user saved in db");
+        log.info("UserController.createUser, user saved in db");
         JsonObject obj = new JsonObject();
         obj.addProperty("answer", "User Saved");
         String json = new Gson().toJson(obj);
-        System.out.println("UserController.createUser " + json);
+        log.info("UserController.createUser {}", json);
         return ResponseEntity.accepted().body(json);
     }
 
@@ -217,13 +219,13 @@ public class UserController {
     @CrossOrigin(origins = "${CROSS_ORIGIN}")
     @PostMapping("/byemail")
     public ResponseEntity<String> getUserIdByEmail(@RequestBody EmailAdress email, BindingResult bindingResult) {
-        System.out.println("UserController.getUserIdByEmail: " + email);
+        log.info("UserController.getUserIdByEmail: {}", email);
         //input validation
         if (bindingResult.hasErrors()) {
             List<String> errors = bindingResult.getFieldErrors().stream()
                     .map(fieldError -> fieldError.getField() + ": " + fieldError.getDefaultMessage())
                     .toList();
-            System.out.println("UserController.createUser " + errors);
+            log.info("UserController.createUser {}", errors);
 
             JsonArray arr = new JsonArray();
             errors.forEach(arr::add);
@@ -231,27 +233,27 @@ public class UserController {
             obj.add("message", arr);
             String json = new Gson().toJson(obj);
 
-            System.out.println("UserController.createUser, validation fails: " + json);
+            log.info("UserController.createUser, validation fails: {}", json);
             return ResponseEntity.badRequest().body(json);
         }
 
-        System.out.println("UserController.getUserIdByEmail: input validation passed");
+        log.info("UserController.getUserIdByEmail: input validation passed");
 
         User user = userService.findByEmail(email.getEmail());
         if (user == null) {
-            System.out.println("UserController.getUserIdByEmail, no user found with email: " + email);
+            log.info("UserController.getUserIdByEmail, no user found with email: {}", email);
             JsonObject obj = new JsonObject();
             obj.addProperty("message", "No user found with this email");
             String json = new Gson().toJson(obj);
 
-            System.out.println("UserController.getUserIdByEmail, fails: " + json);
+            log.info("UserController.getUserIdByEmail, fails: {}", json);
             return ResponseEntity.badRequest().body(json);
         }
-        System.out.println("UserController.getUserIdByEmail, user find by email");
+        log.info("UserController.getUserIdByEmail, user find by email");
         JsonObject obj = new JsonObject();
         obj.addProperty("answer", user.getId());
         String json = new Gson().toJson(obj);
-        System.out.println("UserController.getUserIdByEmail " + json);
+        log.info("UserController.getUserIdByEmail {}", json);
         return ResponseEntity.accepted().body(json);
     }
 
@@ -326,7 +328,7 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Gson().toJson(obj));
         }
         boolean valid = twoFactorService.validateCode(user, body.getCode());
-        System.out.println("UserController.verify2fa: user=" + user.getEmail() + ", code=" + body.getCode() + ", valid=" + valid);
+        log.info("UserController.verify2fa: user=" + user.getEmail() + ", code=" + body.getCode() + ", valid=" + valid);
         if (valid) {
             String token = jwtService.generateToken(user.getId());
             JsonObject obj = new JsonObject();
